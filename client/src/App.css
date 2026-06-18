@@ -1,0 +1,107 @@
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #1a1a1a;
+  background: #f5f6f8;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: #111;
+  color: #fff;
+}
+.topbar h1 { font-size: 1.05rem; margin: 0; }
+.topbar .sub { color: #9aa0a6; font-size: 0.85rem; }
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: #d8dbe0;
+  flex: 1;
+  min-height: 0;
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #fff;
+}
+
+.pane-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #eaecef;
+}
+.pane-head h2 { font-size: 0.9rem; margin: 0; color: #444; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.actions { display: flex; gap: 0.4rem; }
+
+.btn {
+  border: 1px solid #d0d4da;
+  background: #fff;
+  color: #222;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.btn:hover { background: #f2f3f5; }
+.btn.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+.btn.primary:hover { background: #1d4ed8; }
+
+.editor {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  resize: none;
+  padding: 1rem;
+  font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #1f2430;
+  outline: none;
+}
+
+.error {
+  margin: 0;
+  padding: 0.6rem 1rem;
+  background: #fdecec;
+  color: #b00020;
+  font-size: 0.82rem;
+  border-top: 1px solid #f3c2c2;
+  white-space: pre-wrap;
+}
+
+.preview {
+  flex: 1;
+  overflow: auto;
+  padding: 1.25rem;
+}
+
+.surface { margin-bottom: 1.25rem; }
+
+.empty {
+  color: #888;
+  font-size: 0.9rem;
+  padding: 2rem;
+  text-align: center;
+}

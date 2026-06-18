@@ -1,0 +1,17 @@
+{
+  "name": "a2ui-llm-server",
+  "version": "1.0.0",
+  "description": "Server that takes a user prompt and generates A2UI JSON via an LLM (OpenAI now, Anthropic later). Fetches the component catalog at runtime from an MCP server.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "openai": "^4.77.0"
+  }
+}
