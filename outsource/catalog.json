@@ -1,0 +1,2762 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pdesign.dev/catalog/v1/catalog.json",
+  "title": "PDS Core Catalog",
+  "description": "A2UI-style catalog of @pds/core (pdesign-ui) components.",
+  "catalogId": "https://pdesign.dev/catalog/v1/catalog.json",
+  "components": {
+    "Button": {
+      "type": "object",
+      "description": "A call-to-action button supporting primary/secondary styles and surfaces.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "Button"
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Button label content."
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "primary",
+                "secondary"
+              ],
+              "default": "primary",
+              "description": "Visual style."
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "small",
+                "large"
+              ],
+              "default": "large",
+              "description": "Button size."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "width": {
+              "type": "string",
+              "default": "auto",
+              "description": "Fixed width as a CSS value."
+            },
+            "role": {
+              "type": "string",
+              "enum": [
+                "link",
+                "button"
+              ],
+              "default": "button",
+              "description": "Accessibility role."
+            },
+            "href": {
+              "type": "string",
+              "description": "Renders the button as an anchor when set."
+            },
+            "disabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Disables the button."
+            },
+            "ariaLabel": {
+              "type": "string",
+              "description": "Accessible label."
+            }
+          },
+          "required": [
+            "component",
+            "children"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TextLink": {
+      "type": "object",
+      "description": "An inline or standalone text hyperlink.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "TextLink"
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Link text."
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "inline",
+                "standalone"
+              ],
+              "default": "inline",
+              "description": "Inline (underlined) or standalone (bold) link."
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "large",
+                "small"
+              ],
+              "default": "large",
+              "description": "Link size."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "href": {
+              "type": "string",
+              "description": "Destination URL."
+            },
+            "disabled": {
+              "type": "boolean",
+              "description": "Disables the link."
+            },
+            "wrapText": {
+              "type": "boolean",
+              "description": "Allow the text to wrap."
+            },
+            "role": {
+              "type": "string",
+              "description": "Accessibility role."
+            },
+            "ariaLabel": {
+              "type": "string",
+              "description": "Accessible label."
+            }
+          },
+          "required": [
+            "component",
+            "children"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TextLinkCaret": {
+      "type": "object",
+      "description": "A text link with a leading or trailing caret icon.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "TextLinkCaret"
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Link text."
+            },
+            "iconPosition": {
+              "type": "string",
+              "enum": [
+                "left",
+                "right"
+              ],
+              "default": "right",
+              "description": "Caret position."
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "inline",
+                "standalone"
+              ],
+              "default": "standalone",
+              "description": "Link style."
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "large",
+                "small"
+              ],
+              "default": "large",
+              "description": "Link size."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "href": {
+              "type": "string",
+              "description": "Destination URL."
+            },
+            "ariaLabel": {
+              "type": "string",
+              "description": "Accessible label."
+            }
+          },
+          "required": [
+            "component",
+            "children"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "ButtonGroup": {
+      "type": "object",
+      "description": "Lays out a set of buttons / links with shared alignment and sizing.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ButtonGroup"
+            },
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ButtonGroupItem"
+              },
+              "description": "The buttons/links to render (discriminated by `kind`)."
+            },
+            "alignment": {
+              "type": "string",
+              "enum": [
+                "left",
+                "center",
+                "right"
+              ],
+              "default": "center",
+              "description": "Horizontal alignment."
+            },
+            "buttonWidth": {
+              "type": "string",
+              "default": "auto",
+              "description": "Fixed width applied to each button."
+            },
+            "rowQuantity": {
+              "type": "number",
+              "description": "Number of items per row."
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "large",
+                "small"
+              ],
+              "default": "large",
+              "description": "Size applied to all items."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "width": {
+              "type": "string",
+              "description": "Width of the group container."
+            }
+          },
+          "required": [
+            "component",
+            "items"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Text": {
+      "type": "object",
+      "description": "Typographic text supporting body, title and feature scales.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "Text"
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Text content."
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "body",
+                "title",
+                "feature"
+              ],
+              "default": "body",
+              "description": "Typography scale."
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "2xsmall",
+                "xsmall",
+                "small",
+                "medium",
+                "large",
+                "xlarge",
+                "2xlarge"
+              ],
+              "description": "Size within the scale (availability varies by kind)."
+            },
+            "bold": {
+              "type": "boolean",
+              "default": false,
+              "description": "Render at bold weight."
+            },
+            "color": {
+              "type": "string",
+              "description": "Text colour."
+            },
+            "primitive": {
+              "type": "string",
+              "enum": [
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+                "span",
+                "p"
+              ],
+              "default": "p",
+              "description": "HTML element used to render the text."
+            }
+          },
+          "required": [
+            "component",
+            "children"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Caret": {
+      "type": "object",
+      "description": "A chevron/caret icon that inherits the surrounding text colour.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "Caret"
+            },
+            "direction": {
+              "type": "string",
+              "enum": [
+                "left",
+                "right"
+              ],
+              "default": "right",
+              "description": "Chevron direction."
+            },
+            "size": {
+              "type": "number",
+              "default": 12,
+              "description": "Square size in pixels."
+            }
+          },
+          "required": [
+            "component"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "DirectionalIcon": {
+      "type": "object",
+      "description": "A trailing affordance icon: right-arrow or external-link.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "DirectionalIcon"
+            },
+            "name": {
+              "type": "string",
+              "enum": [
+                "right-arrow",
+                "external-link"
+              ],
+              "default": "right-arrow",
+              "description": "Glyph to render."
+            },
+            "size": {
+              "type": "string",
+              "default": "20",
+              "description": "Icon size (px number or CSS size)."
+            },
+            "color": {
+              "type": "string",
+              "description": "Icon colour."
+            }
+          },
+          "required": [
+            "component"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Tooltip": {
+      "type": "object",
+      "description": "A small, accessible info tooltip revealed on hover/focus.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "Tooltip"
+            },
+            "title": {
+              "type": "string",
+              "description": "Plain-text tooltip content."
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Rich tooltip content (takes precedence over title)."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "ariaLabel": {
+              "type": "string",
+              "default": "More information",
+              "description": "Accessible label for the trigger."
+            }
+          },
+          "required": [
+            "component"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Badge": {
+      "type": "object",
+      "description": "A small label/pill, optionally with a tooltip.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "Badge"
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Badge content."
+            },
+            "backgroundColor": {
+              "type": "string",
+              "enum": [
+                "red",
+                "yellow",
+                "green",
+                "orange",
+                "blue",
+                "neonYellow",
+                "grayHighContrast",
+                "grayLowContrast",
+                "black",
+                "white"
+              ],
+              "default": "red",
+              "description": "Predefined colour token (or any CSS colour)."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "elementColor": {
+              "type": "string",
+              "description": "Overrides the text colour."
+            },
+            "numberOfLines": {
+              "type": "number",
+              "default": 1,
+              "description": "Clamp the content to N lines."
+            },
+            "maxWidth": {
+              "type": "string",
+              "default": "auto",
+              "description": "Maximum width as a CSS value."
+            },
+            "padding": {
+              "type": "string",
+              "description": "Custom CSS padding."
+            },
+            "borderRadius": {
+              "type": "string",
+              "description": "Custom CSS border radius."
+            },
+            "tooltip": {
+              "$ref": "#/$defs/TooltipProps",
+              "description": "Tooltip configuration."
+            }
+          },
+          "required": [
+            "component"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "BadgeIndicator": {
+      "type": "object",
+      "description": "A dot (simple) or numbered notification indicator.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "BadgeIndicator"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "simple",
+                "numbered"
+              ],
+              "default": "simple",
+              "description": "Dot or numbered indicator."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "showBorder": {
+              "type": "boolean",
+              "default": true,
+              "description": "Shows a border ring around the container."
+            },
+            "showDot": {
+              "type": "boolean",
+              "default": true,
+              "description": "Shows the dot when kind is simple."
+            },
+            "backgroundColor": {
+              "type": "string",
+              "default": "red",
+              "description": "Colour token or custom CSS colour."
+            },
+            "maximumDigits": {
+              "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                "none"
+              ],
+              "default": 2,
+              "description": "Max digits before truncating with \"+\"."
+            },
+            "leadingCharacter": {
+              "type": "string",
+              "description": "Character shown before the number."
+            },
+            "trailingText": {
+              "type": "string",
+              "description": "Text shown after the number."
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "small",
+                "medium",
+                "large",
+                "xlarge",
+                "2xlarge"
+              ],
+              "default": "small",
+              "description": "Font size for numbered content."
+            },
+            "containerSize": {
+              "type": "string",
+              "default": "16px",
+              "description": "Container height/min-width."
+            },
+            "decimalPoints": {
+              "type": "number",
+              "default": 0,
+              "description": "Decimal places retained for floats."
+            },
+            "elementColor": {
+              "type": "string",
+              "description": "Text/dot colour override."
+            },
+            "borderColor": {
+              "type": "string",
+              "description": "Border colour override."
+            },
+            "padding": {
+              "type": "string",
+              "description": "Custom padding for numbered content."
+            },
+            "dotSize": {
+              "type": "string",
+              "default": "6px",
+              "description": "Dot size when kind is simple."
+            },
+            "children": {
+              "type": "string",
+              "description": "Numbered content. Defaults to \"0\"."
+            },
+            "ariaHidden": {
+              "type": "boolean",
+              "description": "Hides content from assistive tech."
+            }
+          },
+          "required": [
+            "component"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Image": {
+      "type": "object",
+      "description": "A token-aware image wrapper with sizing, radius and border.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "Image"
+            },
+            "src": {
+              "type": "string",
+              "description": "Image source URL."
+            },
+            "alt": {
+              "type": "string",
+              "description": "Alternative text."
+            },
+            "width": {
+              "type": "string",
+              "description": "CSS width."
+            },
+            "height": {
+              "type": "string",
+              "description": "CSS height."
+            },
+            "borderRadius": {
+              "type": "string",
+              "description": "Corner radius."
+            },
+            "showBorder": {
+              "type": "boolean",
+              "description": "Draws a low-contrast border."
+            },
+            "objectFit": {
+              "type": "string",
+              "default": "cover",
+              "description": "CSS object-fit behaviour."
+            }
+          },
+          "required": [
+            "component",
+            "src"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TileContainer": {
+      "type": "object",
+      "description": "A surface container for grouping content; interactive when href/onClick is set.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "TileContainer"
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Tile content."
+            },
+            "background": {
+              "type": "string",
+              "default": "lightSecondary",
+              "description": "Surface token, image URL, or CSS colour."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "padding": {
+              "type": "string",
+              "default": "4X",
+              "description": "Inside padding (space token or CSS value)."
+            },
+            "showBorder": {
+              "type": "boolean",
+              "description": "Draws a border around the tile."
+            },
+            "dropShadow": {
+              "type": "string",
+              "enum": [
+                "none",
+                "subtle",
+                "moderate"
+              ],
+              "default": "none",
+              "description": "Drop shadow elevation."
+            },
+            "borderRadius": {
+              "type": "string",
+              "default": "standard",
+              "description": "Corner radius preset or CSS value."
+            },
+            "aspectRatio": {
+              "type": "string",
+              "default": "1/1",
+              "description": "Aspect ratio when height is not set."
+            },
+            "height": {
+              "type": "string",
+              "description": "Fixed height (CSS value)."
+            },
+            "width": {
+              "type": "string",
+              "default": "100%",
+              "description": "Fixed width (CSS value)."
+            },
+            "imageFallbackColor": {
+              "type": "string",
+              "description": "Fallback colour for image backgrounds."
+            },
+            "elementSurface": {
+              "type": "string",
+              "description": "Surface context for child colours on custom backgrounds."
+            },
+            "focusBorderPosition": {
+              "type": "string",
+              "enum": [
+                "inside",
+                "outside"
+              ],
+              "default": "outside",
+              "description": "Focus-ring position."
+            },
+            "href": {
+              "type": "string",
+              "description": "Makes the tile a link."
+            },
+            "role": {
+              "type": "string",
+              "description": "Accessibility role."
+            },
+            "target": {
+              "type": "string",
+              "description": "Link target."
+            },
+            "ariaLabel": {
+              "type": "string",
+              "description": "Accessible label."
+            }
+          },
+          "required": [
+            "component"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TitleLockup": {
+      "type": "object",
+      "description": "Composes eyebrow, title and subtitle with responsive size cascade.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "TitleLockup"
+            },
+            "eyebrow": {
+              "$ref": "#/$defs/TitleLockupEyebrowProps",
+              "description": "Eyebrow config (TitleLockupEyebrow props)."
+            },
+            "title": {
+              "$ref": "#/$defs/TitleLockupTitleProps",
+              "description": "Title config (TitleLockupTitle props)."
+            },
+            "subtitle": {
+              "$ref": "#/$defs/TitleLockupSubtitleProps",
+              "description": "Subtitle config (TitleLockupSubtitle props)."
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Declarative children when not using object props."
+            },
+            "textAlignment": {
+              "type": "string",
+              "enum": [
+                "left",
+                "center"
+              ],
+              "default": "left",
+              "description": "Horizontal text alignment."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "viewport": {
+              "type": "string",
+              "enum": [
+                "mobile",
+                "tablet",
+                "desktop"
+              ],
+              "description": "Force a viewport for responsive sizing."
+            },
+            "viewportOverride": {
+              "type": "object",
+              "description": "Per-viewport prop overrides."
+            }
+          },
+          "required": [
+            "component"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TitleLockupTitle": {
+      "type": "object",
+      "description": "The title element of a TitleLockup.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "TitleLockupTitle"
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Title text."
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "bodySmall",
+                "bodyMedium",
+                "bodyLarge",
+                "titleSmall",
+                "titleXSmall",
+                "title2XSmall",
+                "titleMedium",
+                "titleLarge",
+                "titleXLarge",
+                "title2XLarge",
+                "featureSmall",
+                "featureMedium"
+              ],
+              "description": "Font size token."
+            },
+            "primitive": {
+              "type": "string",
+              "enum": [
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+                "span",
+                "p"
+              ],
+              "default": "h1",
+              "description": "HTML element."
+            },
+            "bold": {
+              "type": "boolean",
+              "description": "Render at bold weight."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "color": {
+              "type": "string",
+              "description": "Text colour override."
+            },
+            "numberOfLines": {
+              "type": "number",
+              "description": "Clamp to N lines."
+            },
+            "isStandAlone": {
+              "type": "boolean",
+              "description": "Disables the bottom margin when there is no subtitle."
+            },
+            "tooltip": {
+              "$ref": "#/$defs/TooltipProps",
+              "description": "Tooltip configuration."
+            }
+          },
+          "required": [
+            "component",
+            "children"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TitleLockupSubtitle": {
+      "type": "object",
+      "description": "The subtitle element of a TitleLockup.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "TitleLockupSubtitle"
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Subtitle text."
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "bodySmall",
+                "bodyMedium",
+                "bodyLarge",
+                "titleSmall",
+                "titleXSmall",
+                "titleMedium"
+              ],
+              "description": "Font size token."
+            },
+            "primitive": {
+              "type": "string",
+              "enum": [
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+                "span",
+                "p"
+              ],
+              "default": "h2",
+              "description": "HTML element."
+            },
+            "bold": {
+              "type": "boolean",
+              "description": "Render at bold weight."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "color": {
+              "type": "string",
+              "description": "Text colour override."
+            },
+            "numberOfLines": {
+              "type": "number",
+              "description": "Clamp to N lines."
+            },
+            "tooltip": {
+              "$ref": "#/$defs/TooltipProps",
+              "description": "Tooltip configuration."
+            }
+          },
+          "required": [
+            "component",
+            "children"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TitleLockupEyebrow": {
+      "type": "object",
+      "description": "The eyebrow element of a TitleLockup.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "TitleLockupEyebrow"
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Eyebrow text."
+            },
+            "size": {
+              "type": "string",
+              "enum": [
+                "bodySmall",
+                "bodyMedium",
+                "bodyLarge",
+                "titleSmall",
+                "titleXSmall",
+                "titleMedium"
+              ],
+              "description": "Font size token."
+            },
+            "primitive": {
+              "type": "string",
+              "enum": [
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+                "span",
+                "p"
+              ],
+              "default": "h3",
+              "description": "HTML element."
+            },
+            "bold": {
+              "type": "boolean",
+              "description": "Render at bold weight."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "color": {
+              "type": "string",
+              "description": "Text colour override."
+            },
+            "numberOfLines": {
+              "type": "number",
+              "description": "Clamp to N lines."
+            },
+            "isStandAlone": {
+              "type": "boolean",
+              "description": "Disables paddingBottom when standalone."
+            },
+            "paddingBottom": {
+              "type": "string",
+              "description": "Space rendered beneath the eyebrow."
+            },
+            "tooltip": {
+              "$ref": "#/$defs/TooltipProps",
+              "description": "Tooltip configuration."
+            }
+          },
+          "required": [
+            "component",
+            "children"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "ScreenReaderText": {
+      "type": "object",
+      "description": "Text hidden visually but announced by screen readers.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ScreenReaderText"
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Screen-reader-only content."
+            }
+          },
+          "required": [
+            "component",
+            "children"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Tilelet": {
+      "type": "object",
+      "description": "A content tile composed from TileContainer, TitleLockup, Badge and Image.",
+      "allOf": [
+        {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/ComponentCommon"
+        },
+        {
+          "$ref": "#/$defs/CatalogComponentCommon"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "Tilelet"
+            },
+            "title": {
+              "$ref": "#/$defs/TitleLockupTitleProps",
+              "description": "Title config (TitleLockupTitle props)."
+            },
+            "subtitle": {
+              "$ref": "#/$defs/TitleLockupSubtitleProps",
+              "description": "Subtitle config."
+            },
+            "eyebrow": {
+              "$ref": "#/$defs/TitleLockupEyebrowProps",
+              "description": "Eyebrow config."
+            },
+            "badge": {
+              "$ref": "#/$defs/BadgeProps",
+              "description": "Badge config shown at the top."
+            },
+            "image": {
+              "$ref": "#/$defs/ImageProps",
+              "description": "Image config."
+            },
+            "imagePosition": {
+              "type": "string",
+              "enum": [
+                "belowText",
+                "aboveText"
+              ],
+              "default": "belowText",
+              "description": "Image vertical position relative to text."
+            },
+            "imageAlignment": {
+              "type": "string",
+              "enum": [
+                "center",
+                "left",
+                "right"
+              ],
+              "default": "center",
+              "description": "Image horizontal alignment."
+            },
+            "directionalIcon": {
+              "$ref": "#/$defs/DirectionalIconProps",
+              "description": "Trailing directional icon config."
+            },
+            "renderDescriptiveIcon": {
+              "type": "boolean",
+              "default": false,
+              "description": "Exposes the directional icon to assistive tech."
+            },
+            "iconMarginTop": {
+              "type": "string",
+              "default": "16px",
+              "description": "Top margin for the icon container."
+            },
+            "textAlignment": {
+              "type": "string",
+              "enum": [
+                "center",
+                "left"
+              ],
+              "default": "left",
+              "description": "Horizontal text alignment."
+            },
+            "textPosition": {
+              "type": "string",
+              "enum": [
+                "top",
+                "middle",
+                "bottom"
+              ],
+              "default": "top",
+              "description": "Vertical text placement."
+            },
+            "textWidth": {
+              "type": "string",
+              "default": "100%",
+              "description": "Width of the text content area."
+            },
+            "padding": {
+              "type": "string",
+              "default": "4X",
+              "description": "Inside padding."
+            },
+            "background": {
+              "type": "string",
+              "default": "lightSecondary",
+              "description": "Surface token, image URL, or CSS colour."
+            },
+            "surface": {
+              "type": "string",
+              "enum": [
+                "lightPrimary",
+                "lightSecondary",
+                "lightBrandNeutral",
+                "darkPrimary",
+                "darkSecondary",
+                "darkBrandHighlight"
+              ],
+              "default": "lightPrimary",
+              "description": "The surface the component is placed on; drives token colours."
+            },
+            "elementSurface": {
+              "type": "string",
+              "description": "Surface context for child colours."
+            },
+            "showBorder": {
+              "type": "boolean",
+              "description": "Draws an adaptive border."
+            },
+            "dropShadow": {
+              "type": "string",
+              "enum": [
+                "none",
+                "subtle",
+                "moderate"
+              ],
+              "default": "none",
+              "description": "Drop shadow elevation."
+            },
+            "borderRadius": {
+              "type": "string",
+              "default": "standard",
+              "description": "Corner radius preset or CSS value."
+            },
+            "aspectRatio": {
+              "type": "string",
+              "default": "none",
+              "description": "Aspect ratio (content-driven by default)."
+            },
+            "imageFallbackColor": {
+              "type": "string",
+              "description": "Fallback colour for image backgrounds."
+            },
+            "focusBorderPosition": {
+              "type": "string",
+              "enum": [
+                "inside",
+                "outside"
+              ],
+              "default": "outside",
+              "description": "Focus-ring position."
+            },
+            "height": {
+              "type": "string",
+              "description": "Fixed height."
+            },
+            "width": {
+              "type": "string",
+              "default": "100%",
+              "description": "Fixed width."
+            },
+            "href": {
+              "type": "string",
+              "description": "Makes the tilelet a link."
+            },
+            "target": {
+              "type": "string",
+              "description": "Link target."
+            },
+            "role": {
+              "type": "string",
+              "enum": [
+                "button",
+                "link"
+              ],
+              "description": "Semantic role."
+            },
+            "ariaLabel": {
+              "type": "string",
+              "description": "Accessible label (auto-generated when omitted)."
+            }
+          },
+          "required": [
+            "component"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  },
+  "functions": {},
+  "$defs": {
+    "CatalogComponentCommon": {
+      "type": "object",
+      "properties": {
+        "weight": {
+          "type": "number",
+          "description": "The relative weight of this component within a Row or Column, similar to CSS 'flex-grow'."
+        }
+      }
+    },
+    "ButtonProps": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Button label content."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "secondary"
+          ],
+          "default": "primary",
+          "description": "Visual style."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "small",
+            "large"
+          ],
+          "default": "large",
+          "description": "Button size."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "width": {
+          "type": "string",
+          "default": "auto",
+          "description": "Fixed width as a CSS value."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "link",
+            "button"
+          ],
+          "default": "button",
+          "description": "Accessibility role."
+        },
+        "href": {
+          "type": "string",
+          "description": "Renders the button as an anchor when set."
+        },
+        "disabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disables the button."
+        },
+        "ariaLabel": {
+          "type": "string",
+          "description": "Accessible label."
+        }
+      },
+      "required": [
+        "children"
+      ]
+    },
+    "TextLinkProps": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Link text."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "inline",
+            "standalone"
+          ],
+          "default": "inline",
+          "description": "Inline (underlined) or standalone (bold) link."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "large",
+            "small"
+          ],
+          "default": "large",
+          "description": "Link size."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "href": {
+          "type": "string",
+          "description": "Destination URL."
+        },
+        "disabled": {
+          "type": "boolean",
+          "description": "Disables the link."
+        },
+        "wrapText": {
+          "type": "boolean",
+          "description": "Allow the text to wrap."
+        },
+        "role": {
+          "type": "string",
+          "description": "Accessibility role."
+        },
+        "ariaLabel": {
+          "type": "string",
+          "description": "Accessible label."
+        }
+      },
+      "required": [
+        "children"
+      ]
+    },
+    "TextLinkCaretProps": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Link text."
+        },
+        "iconPosition": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right"
+          ],
+          "default": "right",
+          "description": "Caret position."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "inline",
+            "standalone"
+          ],
+          "default": "standalone",
+          "description": "Link style."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "large",
+            "small"
+          ],
+          "default": "large",
+          "description": "Link size."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "href": {
+          "type": "string",
+          "description": "Destination URL."
+        },
+        "ariaLabel": {
+          "type": "string",
+          "description": "Accessible label."
+        }
+      },
+      "required": [
+        "children"
+      ]
+    },
+    "ButtonGroupProps": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ButtonGroupItem"
+          },
+          "description": "The buttons/links to render (discriminated by `kind`)."
+        },
+        "alignment": {
+          "type": "string",
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ],
+          "default": "center",
+          "description": "Horizontal alignment."
+        },
+        "buttonWidth": {
+          "type": "string",
+          "default": "auto",
+          "description": "Fixed width applied to each button."
+        },
+        "rowQuantity": {
+          "type": "number",
+          "description": "Number of items per row."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "large",
+            "small"
+          ],
+          "default": "large",
+          "description": "Size applied to all items."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "width": {
+          "type": "string",
+          "description": "Width of the group container."
+        }
+      },
+      "required": [
+        "items"
+      ]
+    },
+    "TextProps": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Text content."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "body",
+            "title",
+            "feature"
+          ],
+          "default": "body",
+          "description": "Typography scale."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "2xsmall",
+            "xsmall",
+            "small",
+            "medium",
+            "large",
+            "xlarge",
+            "2xlarge"
+          ],
+          "description": "Size within the scale (availability varies by kind)."
+        },
+        "bold": {
+          "type": "boolean",
+          "default": false,
+          "description": "Render at bold weight."
+        },
+        "color": {
+          "type": "string",
+          "description": "Text colour."
+        },
+        "primitive": {
+          "type": "string",
+          "enum": [
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "span",
+            "p"
+          ],
+          "default": "p",
+          "description": "HTML element used to render the text."
+        }
+      },
+      "required": [
+        "children"
+      ]
+    },
+    "CaretProps": {
+      "type": "object",
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "left",
+            "right"
+          ],
+          "default": "right",
+          "description": "Chevron direction."
+        },
+        "size": {
+          "type": "number",
+          "default": 12,
+          "description": "Square size in pixels."
+        }
+      }
+    },
+    "DirectionalIconProps": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "right-arrow",
+            "external-link"
+          ],
+          "default": "right-arrow",
+          "description": "Glyph to render."
+        },
+        "size": {
+          "type": "string",
+          "default": "20",
+          "description": "Icon size (px number or CSS size)."
+        },
+        "color": {
+          "type": "string",
+          "description": "Icon colour."
+        }
+      }
+    },
+    "TooltipProps": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Plain-text tooltip content."
+        },
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Rich tooltip content (takes precedence over title)."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "ariaLabel": {
+          "type": "string",
+          "default": "More information",
+          "description": "Accessible label for the trigger."
+        }
+      }
+    },
+    "BadgeProps": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Badge content."
+        },
+        "backgroundColor": {
+          "type": "string",
+          "enum": [
+            "red",
+            "yellow",
+            "green",
+            "orange",
+            "blue",
+            "neonYellow",
+            "grayHighContrast",
+            "grayLowContrast",
+            "black",
+            "white"
+          ],
+          "default": "red",
+          "description": "Predefined colour token (or any CSS colour)."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "elementColor": {
+          "type": "string",
+          "description": "Overrides the text colour."
+        },
+        "numberOfLines": {
+          "type": "number",
+          "default": 1,
+          "description": "Clamp the content to N lines."
+        },
+        "maxWidth": {
+          "type": "string",
+          "default": "auto",
+          "description": "Maximum width as a CSS value."
+        },
+        "padding": {
+          "type": "string",
+          "description": "Custom CSS padding."
+        },
+        "borderRadius": {
+          "type": "string",
+          "description": "Custom CSS border radius."
+        },
+        "tooltip": {
+          "$ref": "#/$defs/TooltipProps",
+          "description": "Tooltip configuration."
+        }
+      }
+    },
+    "BadgeIndicatorProps": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "simple",
+            "numbered"
+          ],
+          "default": "simple",
+          "description": "Dot or numbered indicator."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "showBorder": {
+          "type": "boolean",
+          "default": true,
+          "description": "Shows a border ring around the container."
+        },
+        "showDot": {
+          "type": "boolean",
+          "default": true,
+          "description": "Shows the dot when kind is simple."
+        },
+        "backgroundColor": {
+          "type": "string",
+          "default": "red",
+          "description": "Colour token or custom CSS colour."
+        },
+        "maximumDigits": {
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            "none"
+          ],
+          "default": 2,
+          "description": "Max digits before truncating with \"+\"."
+        },
+        "leadingCharacter": {
+          "type": "string",
+          "description": "Character shown before the number."
+        },
+        "trailingText": {
+          "type": "string",
+          "description": "Text shown after the number."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "small",
+            "medium",
+            "large",
+            "xlarge",
+            "2xlarge"
+          ],
+          "default": "small",
+          "description": "Font size for numbered content."
+        },
+        "containerSize": {
+          "type": "string",
+          "default": "16px",
+          "description": "Container height/min-width."
+        },
+        "decimalPoints": {
+          "type": "number",
+          "default": 0,
+          "description": "Decimal places retained for floats."
+        },
+        "elementColor": {
+          "type": "string",
+          "description": "Text/dot colour override."
+        },
+        "borderColor": {
+          "type": "string",
+          "description": "Border colour override."
+        },
+        "padding": {
+          "type": "string",
+          "description": "Custom padding for numbered content."
+        },
+        "dotSize": {
+          "type": "string",
+          "default": "6px",
+          "description": "Dot size when kind is simple."
+        },
+        "children": {
+          "type": "string",
+          "description": "Numbered content. Defaults to \"0\"."
+        },
+        "ariaHidden": {
+          "type": "boolean",
+          "description": "Hides content from assistive tech."
+        }
+      }
+    },
+    "ImageProps": {
+      "type": "object",
+      "properties": {
+        "src": {
+          "type": "string",
+          "description": "Image source URL."
+        },
+        "alt": {
+          "type": "string",
+          "description": "Alternative text."
+        },
+        "width": {
+          "type": "string",
+          "description": "CSS width."
+        },
+        "height": {
+          "type": "string",
+          "description": "CSS height."
+        },
+        "borderRadius": {
+          "type": "string",
+          "description": "Corner radius."
+        },
+        "showBorder": {
+          "type": "boolean",
+          "description": "Draws a low-contrast border."
+        },
+        "objectFit": {
+          "type": "string",
+          "default": "cover",
+          "description": "CSS object-fit behaviour."
+        }
+      },
+      "required": [
+        "src"
+      ]
+    },
+    "TileContainerProps": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Tile content."
+        },
+        "background": {
+          "type": "string",
+          "default": "lightSecondary",
+          "description": "Surface token, image URL, or CSS colour."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "padding": {
+          "type": "string",
+          "default": "4X",
+          "description": "Inside padding (space token or CSS value)."
+        },
+        "showBorder": {
+          "type": "boolean",
+          "description": "Draws a border around the tile."
+        },
+        "dropShadow": {
+          "type": "string",
+          "enum": [
+            "none",
+            "subtle",
+            "moderate"
+          ],
+          "default": "none",
+          "description": "Drop shadow elevation."
+        },
+        "borderRadius": {
+          "type": "string",
+          "default": "standard",
+          "description": "Corner radius preset or CSS value."
+        },
+        "aspectRatio": {
+          "type": "string",
+          "default": "1/1",
+          "description": "Aspect ratio when height is not set."
+        },
+        "height": {
+          "type": "string",
+          "description": "Fixed height (CSS value)."
+        },
+        "width": {
+          "type": "string",
+          "default": "100%",
+          "description": "Fixed width (CSS value)."
+        },
+        "imageFallbackColor": {
+          "type": "string",
+          "description": "Fallback colour for image backgrounds."
+        },
+        "elementSurface": {
+          "type": "string",
+          "description": "Surface context for child colours on custom backgrounds."
+        },
+        "focusBorderPosition": {
+          "type": "string",
+          "enum": [
+            "inside",
+            "outside"
+          ],
+          "default": "outside",
+          "description": "Focus-ring position."
+        },
+        "href": {
+          "type": "string",
+          "description": "Makes the tile a link."
+        },
+        "role": {
+          "type": "string",
+          "description": "Accessibility role."
+        },
+        "target": {
+          "type": "string",
+          "description": "Link target."
+        },
+        "ariaLabel": {
+          "type": "string",
+          "description": "Accessible label."
+        }
+      }
+    },
+    "TitleLockupProps": {
+      "type": "object",
+      "properties": {
+        "eyebrow": {
+          "$ref": "#/$defs/TitleLockupEyebrowProps",
+          "description": "Eyebrow config (TitleLockupEyebrow props)."
+        },
+        "title": {
+          "$ref": "#/$defs/TitleLockupTitleProps",
+          "description": "Title config (TitleLockupTitle props)."
+        },
+        "subtitle": {
+          "$ref": "#/$defs/TitleLockupSubtitleProps",
+          "description": "Subtitle config (TitleLockupSubtitle props)."
+        },
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Declarative children when not using object props."
+        },
+        "textAlignment": {
+          "type": "string",
+          "enum": [
+            "left",
+            "center"
+          ],
+          "default": "left",
+          "description": "Horizontal text alignment."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "viewport": {
+          "type": "string",
+          "enum": [
+            "mobile",
+            "tablet",
+            "desktop"
+          ],
+          "description": "Force a viewport for responsive sizing."
+        },
+        "viewportOverride": {
+          "type": "object",
+          "description": "Per-viewport prop overrides."
+        }
+      }
+    },
+    "TitleLockupTitleProps": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Title text."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "bodySmall",
+            "bodyMedium",
+            "bodyLarge",
+            "titleSmall",
+            "titleXSmall",
+            "title2XSmall",
+            "titleMedium",
+            "titleLarge",
+            "titleXLarge",
+            "title2XLarge",
+            "featureSmall",
+            "featureMedium"
+          ],
+          "description": "Font size token."
+        },
+        "primitive": {
+          "type": "string",
+          "enum": [
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "span",
+            "p"
+          ],
+          "default": "h1",
+          "description": "HTML element."
+        },
+        "bold": {
+          "type": "boolean",
+          "description": "Render at bold weight."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "color": {
+          "type": "string",
+          "description": "Text colour override."
+        },
+        "numberOfLines": {
+          "type": "number",
+          "description": "Clamp to N lines."
+        },
+        "isStandAlone": {
+          "type": "boolean",
+          "description": "Disables the bottom margin when there is no subtitle."
+        },
+        "tooltip": {
+          "$ref": "#/$defs/TooltipProps",
+          "description": "Tooltip configuration."
+        }
+      },
+      "required": [
+        "children"
+      ]
+    },
+    "TitleLockupSubtitleProps": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Subtitle text."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "bodySmall",
+            "bodyMedium",
+            "bodyLarge",
+            "titleSmall",
+            "titleXSmall",
+            "titleMedium"
+          ],
+          "description": "Font size token."
+        },
+        "primitive": {
+          "type": "string",
+          "enum": [
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "span",
+            "p"
+          ],
+          "default": "h2",
+          "description": "HTML element."
+        },
+        "bold": {
+          "type": "boolean",
+          "description": "Render at bold weight."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "color": {
+          "type": "string",
+          "description": "Text colour override."
+        },
+        "numberOfLines": {
+          "type": "number",
+          "description": "Clamp to N lines."
+        },
+        "tooltip": {
+          "$ref": "#/$defs/TooltipProps",
+          "description": "Tooltip configuration."
+        }
+      },
+      "required": [
+        "children"
+      ]
+    },
+    "TitleLockupEyebrowProps": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Eyebrow text."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "bodySmall",
+            "bodyMedium",
+            "bodyLarge",
+            "titleSmall",
+            "titleXSmall",
+            "titleMedium"
+          ],
+          "description": "Font size token."
+        },
+        "primitive": {
+          "type": "string",
+          "enum": [
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "span",
+            "p"
+          ],
+          "default": "h3",
+          "description": "HTML element."
+        },
+        "bold": {
+          "type": "boolean",
+          "description": "Render at bold weight."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "color": {
+          "type": "string",
+          "description": "Text colour override."
+        },
+        "numberOfLines": {
+          "type": "number",
+          "description": "Clamp to N lines."
+        },
+        "isStandAlone": {
+          "type": "boolean",
+          "description": "Disables paddingBottom when standalone."
+        },
+        "paddingBottom": {
+          "type": "string",
+          "description": "Space rendered beneath the eyebrow."
+        },
+        "tooltip": {
+          "$ref": "#/$defs/TooltipProps",
+          "description": "Tooltip configuration."
+        }
+      },
+      "required": [
+        "children"
+      ]
+    },
+    "ScreenReaderTextProps": {
+      "type": "object",
+      "properties": {
+        "children": {
+          "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+          "description": "Screen-reader-only content."
+        }
+      },
+      "required": [
+        "children"
+      ]
+    },
+    "TileletProps": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "$ref": "#/$defs/TitleLockupTitleProps",
+          "description": "Title config (TitleLockupTitle props)."
+        },
+        "subtitle": {
+          "$ref": "#/$defs/TitleLockupSubtitleProps",
+          "description": "Subtitle config."
+        },
+        "eyebrow": {
+          "$ref": "#/$defs/TitleLockupEyebrowProps",
+          "description": "Eyebrow config."
+        },
+        "badge": {
+          "$ref": "#/$defs/BadgeProps",
+          "description": "Badge config shown at the top."
+        },
+        "image": {
+          "$ref": "#/$defs/ImageProps",
+          "description": "Image config."
+        },
+        "imagePosition": {
+          "type": "string",
+          "enum": [
+            "belowText",
+            "aboveText"
+          ],
+          "default": "belowText",
+          "description": "Image vertical position relative to text."
+        },
+        "imageAlignment": {
+          "type": "string",
+          "enum": [
+            "center",
+            "left",
+            "right"
+          ],
+          "default": "center",
+          "description": "Image horizontal alignment."
+        },
+        "directionalIcon": {
+          "$ref": "#/$defs/DirectionalIconProps",
+          "description": "Trailing directional icon config."
+        },
+        "renderDescriptiveIcon": {
+          "type": "boolean",
+          "default": false,
+          "description": "Exposes the directional icon to assistive tech."
+        },
+        "iconMarginTop": {
+          "type": "string",
+          "default": "16px",
+          "description": "Top margin for the icon container."
+        },
+        "textAlignment": {
+          "type": "string",
+          "enum": [
+            "center",
+            "left"
+          ],
+          "default": "left",
+          "description": "Horizontal text alignment."
+        },
+        "textPosition": {
+          "type": "string",
+          "enum": [
+            "top",
+            "middle",
+            "bottom"
+          ],
+          "default": "top",
+          "description": "Vertical text placement."
+        },
+        "textWidth": {
+          "type": "string",
+          "default": "100%",
+          "description": "Width of the text content area."
+        },
+        "padding": {
+          "type": "string",
+          "default": "4X",
+          "description": "Inside padding."
+        },
+        "background": {
+          "type": "string",
+          "default": "lightSecondary",
+          "description": "Surface token, image URL, or CSS colour."
+        },
+        "surface": {
+          "type": "string",
+          "enum": [
+            "lightPrimary",
+            "lightSecondary",
+            "lightBrandNeutral",
+            "darkPrimary",
+            "darkSecondary",
+            "darkBrandHighlight"
+          ],
+          "default": "lightPrimary",
+          "description": "The surface the component is placed on; drives token colours."
+        },
+        "elementSurface": {
+          "type": "string",
+          "description": "Surface context for child colours."
+        },
+        "showBorder": {
+          "type": "boolean",
+          "description": "Draws an adaptive border."
+        },
+        "dropShadow": {
+          "type": "string",
+          "enum": [
+            "none",
+            "subtle",
+            "moderate"
+          ],
+          "default": "none",
+          "description": "Drop shadow elevation."
+        },
+        "borderRadius": {
+          "type": "string",
+          "default": "standard",
+          "description": "Corner radius preset or CSS value."
+        },
+        "aspectRatio": {
+          "type": "string",
+          "default": "none",
+          "description": "Aspect ratio (content-driven by default)."
+        },
+        "imageFallbackColor": {
+          "type": "string",
+          "description": "Fallback colour for image backgrounds."
+        },
+        "focusBorderPosition": {
+          "type": "string",
+          "enum": [
+            "inside",
+            "outside"
+          ],
+          "default": "outside",
+          "description": "Focus-ring position."
+        },
+        "height": {
+          "type": "string",
+          "description": "Fixed height."
+        },
+        "width": {
+          "type": "string",
+          "default": "100%",
+          "description": "Fixed width."
+        },
+        "href": {
+          "type": "string",
+          "description": "Makes the tilelet a link."
+        },
+        "target": {
+          "type": "string",
+          "description": "Link target."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "button",
+            "link"
+          ],
+          "description": "Semantic role."
+        },
+        "ariaLabel": {
+          "type": "string",
+          "description": "Accessible label (auto-generated when omitted)."
+        }
+      }
+    },
+    "ButtonGroupItem": {
+      "description": "A single entry in ButtonGroup.items, discriminated by `kind`: primary/secondary render a Button, textLink a TextLink, textLinkCaret a TextLinkCaret.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "primary",
+                "secondary"
+              ],
+              "description": "Renders a Button of this kind."
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Button label."
+            },
+            "href": {
+              "type": "string",
+              "description": "Renders the button as a link when set."
+            },
+            "ariaLabel": {
+              "type": "string",
+              "description": "Accessible label."
+            }
+          },
+          "required": [
+            "kind",
+            "children"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "textLink"
+              ],
+              "description": "Renders a TextLink."
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Link text."
+            },
+            "href": {
+              "type": "string",
+              "description": "Destination URL."
+            },
+            "ariaLabel": {
+              "type": "string",
+              "description": "Accessible label."
+            }
+          },
+          "required": [
+            "kind",
+            "children"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "textLinkCaret"
+              ],
+              "description": "Renders a TextLinkCaret."
+            },
+            "children": {
+              "$ref": "https://a2ui.org/specification/v0_9/common_types.json#/$defs/DynamicString",
+              "description": "Link text."
+            },
+            "href": {
+              "type": "string",
+              "description": "Destination URL."
+            },
+            "iconPosition": {
+              "type": "string",
+              "enum": [
+                "left",
+                "right"
+              ],
+              "default": "right",
+              "description": "Caret position."
+            },
+            "ariaLabel": {
+              "type": "string",
+              "description": "Accessible label."
+            }
+          },
+          "required": [
+            "kind",
+            "children"
+          ]
+        }
+      ]
+    }
+  }
+}
