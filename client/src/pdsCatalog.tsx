@@ -42,6 +42,9 @@ const componentMap: Record<string, React.ElementType> = {
   TitleLockupSubtitle: PDS.TitleLockupSubtitle,
   TitleLockupEyebrow: PDS.TitleLockupEyebrow,
   ScreenReaderText: PDS.ScreenReaderText,
+  Accordion: PDS.Accordion,
+  AccordionItem: PDS.AccordionItem,
+  AccordionItemHeader: PDS.AccordionItemHeader,
   Tilelet: PDS.Tilelet,
 };
 
