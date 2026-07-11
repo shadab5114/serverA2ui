@@ -3,6 +3,8 @@ import express from "express";
 import { fetchCatalog } from "./mcpClient.js";
 import { buildSystemPrompt } from "./systemPrompt.js";
 import { generateA2UI } from "./llm.js";
+import { validateAndRepairGraph } from "./validateGraph.js";
+import { mergeBasicLayout } from "./basicLayoutCatalog.js";
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
@@ -36,9 +38,21 @@ app.post("/generate", async (req, res) => {
     // 1. Full component schemas are sourced live from the MCP server every request.
     const catalog = await fetchCatalog();
 
+    // 1b. Merge borrowed layout components (Column/Row/List/Divider) from the
+    //     basic catalog — the design system has no generic container. The DS
+    //     wins on any name collision. The client registers matching renderers.
+    mergeBasicLayout(catalog);
+
     // 2 + 3. Build prompt and generate.
     const systemPrompt = buildSystemPrompt(catalog);
     const { json, provider, model } = await generateA2UI(systemPrompt, prompt);
+
+    // 3b. Sanity-check the component graph and repair orphans so the UI is not
+    //     silently blank when the model mis-wires children.
+    const validation = validateAndRepairGraph(json);
+    if (validation.warnings.length || validation.errors.length) {
+      console.warn("[/generate] graph validation:", JSON.stringify(validation));
+    }
 
     // 4. Return the A2UI document plus a little metadata.
     return res.json({
@@ -48,6 +62,7 @@ app.post("/generate", async (req, res) => {
         catalogId: catalog.catalogId,
         components: catalog.names,
         generatedAt: new Date().toISOString(),
+        validation,
       },
       ...json,
     });

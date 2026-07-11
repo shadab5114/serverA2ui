@@ -15,20 +15,22 @@
  * catalog entry (`api.schema`) as the component's contract.
  */
 import React from "react";
-import * as PDS from "@pds/core";
-import * as Schemas from "@pds/core/schemas";
-import { createBinderlessComponentImplementation } from "@a2ui/react/v0_9";
+import * as PDS from "@shadab5114/pds-core";
+import * as Schemas from "@shadab5114/pds-core/schemas";
+import { createBinderlessComponentImplementation, basicCatalog } from "@a2ui/react/v0_9";
 import { Catalog } from "@a2ui/web_core/v0_9";
 
 /** Catalog name the renderer registers under (surfaces bind to it by id). */
 export const CATALOG_NAME = "pds";
 
-/** A2UI component name -> the pds React component that renders it. */
+/** A2UI component name -> the pds React component that renders it.
+ *  Keys mirror the component names in @shadab5114/pds-core's catalog.json. */
 const componentMap: Record<string, React.ElementType> = {
   Button: PDS.Button,
   TextLink: PDS.TextLink,
   TextLinkCaret: PDS.TextLinkCaret,
   ButtonGroup: PDS.ButtonGroup,
+  IconButton: PDS.IconButton,
   Text: PDS.Text,
   Caret: PDS.Caret,
   DirectionalIcon: PDS.DirectionalIcon,
@@ -37,15 +39,21 @@ const componentMap: Record<string, React.ElementType> = {
   BadgeIndicator: PDS.BadgeIndicator,
   Image: PDS.Image,
   TileContainer: PDS.TileContainer,
+  ComposableTileContainer: PDS.ComposableTileContainer,
   TitleLockup: PDS.TitleLockup,
   TitleLockupTitle: PDS.TitleLockupTitle,
   TitleLockupSubtitle: PDS.TitleLockupSubtitle,
   TitleLockupEyebrow: PDS.TitleLockupEyebrow,
   ScreenReaderText: PDS.ScreenReaderText,
+  Tilelet: PDS.Tilelet,
   Accordion: PDS.Accordion,
   AccordionItem: PDS.AccordionItem,
-  AccordionItemHeader: PDS.AccordionItemHeader,
-  Tilelet: PDS.Tilelet,
+  InputField: PDS.InputField,
+  Checkbox: PDS.Checkbox,
+  CheckboxGroup: PDS.CheckboxGroup,
+  RadioButton: PDS.RadioButton,
+  RadioButtonGroup: PDS.RadioButtonGroup,
+  Notification: PDS.Notification,
 };
 
 /** Component name -> its zod schema (from @pds/core/schemas, "<Name>Schema"). */
@@ -134,6 +142,12 @@ function makeImplementation(name: string) {
     const raw: Record<string, any> = context?.componentModel?.properties || {};
     const dc = context.dataContext;
 
+    // Does a string name an actual component on this surface? Used to tell a
+    // single child reference (`children: "signup-form"`) apart from text
+    // content (`children: "Submit"`).
+    const isComponentId = (v: any) =>
+      typeof v === "string" && !!context?.surfaceComponents?.get?.(v);
+
     const props: Record<string, any> = {};
     let childrenNode: React.ReactNode = undefined;
 
@@ -144,9 +158,12 @@ function makeImplementation(name: string) {
         continue;
       }
       if (key === "children") {
-        // Either child references (list/template) OR text content.
+        // Child references (list / template / single id) OR text content.
         if (isTemplate(value) || isChildList(value)) {
           childrenNode = resolveChildren(value, dc, buildChild);
+        } else if (isComponentId(value)) {
+          // A single component-id reference, e.g. TileContainer children: "signup-form".
+          childrenNode = buildChild(value);
         } else {
           childrenNode = resolveValue(value, dc); // text/content
         }
@@ -166,11 +183,24 @@ function makeImplementation(name: string) {
   });
 }
 
-/** Build the @pds/core catalog for the @a2ui MessageProcessor. */
+/** Layout primitives borrowed from the basic A2UI catalog. The pds design
+ *  system has no generic stack/row container, so we fall back to these for
+ *  spacing/structure; pds components still win on any name overlap.
+ *  MUST stay in sync with the server's BASIC_LAYOUT_COMPONENTS keys in
+ *  src/basicLayoutCatalog.js (which teaches the LLM the same set). */
+const FALLBACK_LAYOUT = ["Column", "Row", "List", "Divider"];
+
+/** Build the merged catalog (pds components + basic-catalog layout) for the
+ *  @a2ui MessageProcessor. */
 export function createPdsCatalog() {
-  const implementations = Object.keys(componentMap).map(makeImplementation);
-  return new Catalog(CATALOG_NAME, implementations, []);
+  const pdsImpls = Object.keys(componentMap).map(makeImplementation);
+  const pdsNames = new Set(Object.keys(componentMap));
+  const layoutImpls = [...basicCatalog.components.values()].filter(
+    (impl: any) => FALLBACK_LAYOUT.includes(impl.name) && !pdsNames.has(impl.name)
+  );
+  const functions = [...basicCatalog.functions.values()];
+  return new Catalog(CATALOG_NAME, [...pdsImpls, ...layoutImpls], functions as any);
 }
 
 /** Component names this catalog supports (handy for the UI). */
-export const supportedComponents = Object.keys(componentMap);
+export const supportedComponents = [...Object.keys(componentMap), ...FALLBACK_LAYOUT];

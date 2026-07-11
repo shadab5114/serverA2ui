@@ -78,6 +78,8 @@ export default function App() {
   const [text, setText] = useState(SAMPLE);
   const [error, setError] = useState<string | null>(null);
   const [surfaces, setSurfaces] = useState<any[]>([]);
+  const [prompt, setPrompt] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // One processor, holding our pds catalog.
   const processor = useMemo(() => {
@@ -102,29 +104,63 @@ export default function App() {
     setSurfaces([]);
   };
 
-  const render = () => {
+  /** Parse + render a raw JSON string. Returns true on success. */
+  const renderText = (source: string): boolean => {
     setError(null);
     clearSurfaces();
-    if (!text.trim()) {
+    if (!source.trim()) {
       setError("Paste some A2UI JSON first.");
-      return;
+      return false;
     }
     let parsed: any;
     try {
-      parsed = JSON.parse(text);
+      parsed = JSON.parse(source);
     } catch (e: any) {
       setError(`JSON parse error: ${e.message}`);
-      return;
+      return false;
     }
     const messages = extractMessages(parsed);
     if (messages.length === 0) {
       setError("No A2UI messages found (expected createSurface / updateComponents / updateDataModel).");
-      return;
+      return false;
     }
     try {
       processor.processMessages(messages);
+      return true;
     } catch (e: any) {
       setError(`Render error: ${e.message}`);
+      return false;
+    }
+  };
+
+  const render = () => renderText(text);
+
+  /** Send the prompt to the /generate API, drop the result in the editor, and render it. */
+  const generate = async () => {
+    if (!prompt.trim()) {
+      setError("Type a prompt first.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(`API error (${res.status}): ${data?.error || res.statusText}${data?.hint ? `\n${data.hint}` : ""}`);
+        return;
+      }
+      const pretty = JSON.stringify(data, null, 2);
+      setText(pretty);
+      renderText(pretty);
+    } catch (e: any) {
+      setError(`Request failed: ${e.message}. Is the server running on :8080?`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -132,8 +168,23 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <h1>A2UI Renderer</h1>
-        <span className="sub">paste A2UI JSON → preview with @pds/core</span>
+        <span className="sub">describe a UI → generate → preview with @shadab5114/pds-core</span>
       </header>
+
+      <div className="promptbar">
+        <input
+          className="prompt-input"
+          type="text"
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !loading) generate(); }}
+          placeholder="Describe the UI you want (e.g. “a sign-up form with name, email and a submit button”)…"
+          disabled={loading}
+        />
+        <button className="btn primary" onClick={generate} disabled={loading}>
+          {loading ? "Generating…" : "Generate ✦"}
+        </button>
+      </div>
 
       <div className="split">
         <section className="pane left">

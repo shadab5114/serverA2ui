@@ -1,21 +1,22 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// @pds/core is linked via `npm link`, so:
-//  - dedupe react/react-dom so the linked package shares the app's single copy
-//  - exclude @pds/core from prebundling (it changes on rebuild of the design system)
-//  - allow serving files from outside the project root (the symlinked package)
+// @shadab5114/pds-core is a normal installed dependency now, so we only need to
+// dedupe react/react-dom so it shares the app's single React copy.
 export default defineConfig({
   plugins: [react()],
   resolve: {
     dedupe: ["react", "react-dom"],
   },
-  optimizeDeps: {
-    exclude: ["@pds/core"],
-  },
   server: {
     port: 5176,
     strictPort: true,
     fs: { strict: false },
+    // Proxy /generate (and /health) to the A2UI generation server so the client
+    // can call it same-origin and avoid CORS. Override the target with API_TARGET.
+    proxy: {
+      "/generate": { target: process.env.API_TARGET || "http://localhost:8080", changeOrigin: true },
+      "/health": { target: process.env.API_TARGET || "http://localhost:8080", changeOrigin: true },
+    },
   },
 });

@@ -23,11 +23,17 @@ async function generateWithOpenAI(systemPrompt, userPrompt) {
   const model = process.env.OPENAI_MODEL || "gpt-4o";
   const client = new OpenAI({ apiKey });
 
+  // Cap the completion so OpenAI doesn't reserve the model's full output window
+  // against the per-minute token budget (that reservation is what tips a ~15k
+  // input over a 30k TPM limit). 6k is ample for an A2UI document.
+  const maxTokens = Number(process.env.OPENAI_MAX_TOKENS) || 6000;
+
   const completion = await client.chat.completions.create({
     model,
     // Force strict JSON output so the response is always parseable.
     response_format: { type: "json_object" },
     temperature: 0.2,
+    max_tokens: maxTokens,
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },

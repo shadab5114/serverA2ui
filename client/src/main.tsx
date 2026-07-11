@@ -5,11 +5,11 @@ import "./App.css";
 
 // A2UI base styles (layout primitives, etc.)
 import { injectStyles } from "@a2ui/react/styles";
-// @pds/core design tokens (CSS custom properties on :root) — MUST load before
-// the component styles, which reference 600+ --pdesign-* vars defined here.
-import "pdesign-tokens/dist/tokens/index.css";
-// @pds/core component styles.
-import "@pds/core/styles.css";
+// @shadab5114/pds-core design tokens (CSS custom properties on :root) — MUST
+// load before the component styles, which reference the --pdesign-* vars here.
+import "@shadab5114/pdesign-tokens/index.css";
+// @shadab5114/pds-core component styles.
+import "@shadab5114/pds-core/styles.css";
 
 injectStyles();
 

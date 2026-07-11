@@ -6,7 +6,9 @@
  * components, real property names, and the correct property shapes.
  */
 export function buildSystemPrompt({ catalogId, components, defs }) {
-  const schemaBlock = JSON.stringify({ components, $defs: defs }, null, 2);
+  // Minified (no indentation) to keep the prompt small — the LLM parses compact
+  // JSON fine, and the whitespace savings meaningfully cut input tokens.
+  const schemaBlock = JSON.stringify({ components, $defs: defs });
   const catalogIdValue = catalogId || "<catalogId from the catalog>";
 
   return `You are an A2UI (Agent-to-UI) generation engine that emits A2UI **v0.9**.
@@ -82,12 +84,36 @@ order:
 
 ## Children
 - Single child:        "child": "child-id"
-- Multiple children:   "children": ["id1", "id2", "id3"]
-- Repeat a template over a data-model array (PREFER THIS for lists):
+- Multiple children (a STATIC set of components):
+      "children": ["id1", "id2", "id3"]     ← an ARRAY of id strings
+- Repeat a template over a data-model array (use ONLY for dynamic lists):
       "children": { "path": "/shoes", "componentId": "shoe-tile" }
   Then define ONE component with "id": "shoe-tile". Inside the template, bind
   with RELATIVE pointers (no leading slash) that resolve against each array
   item: e.g. "title": { "children": { "path": "name" } }.
+- CRITICAL: For a fixed set of child components (e.g. a form's fields and its
+  submit button), you MUST use the ARRAY form: "children": ["nameField", ...].
+  NEVER write "children": { "path": "form" } — an object with a bare "path" and
+  no "componentId" is a DATA BINDING, not a child list; it renders NOTHING.
+- NEVER point "child"/"children" at a data-model path you did not seed in an
+  updateDataModel message. Static child components are wired by id, not by data.
+
+# Structure rules (a UI that does not follow these renders BLANK)
+- EXACTLY ONE component has "id": "root". It is the tree root.
+- EVERY other component MUST be reachable from "root" through "child"/"children"
+  (directly or transitively). There must be NO orphan components — if you define
+  a component, something above it MUST reference its id.
+- So the root (or an intermediate container) MUST list its children by id, e.g.
+  root's "children": ["nameField", "emailField", "submitButton"].
+
+# Layout & spacing
+The design-system components do NOT add spacing between stacked children. The
+schemas below therefore ALSO include generic layout components — Column
+(vertical), Row (horizontal), List, Divider — which DO space their children.
+For a form or ANY stacked UI, wrap the fields/buttons in a Column: make it the
+root, or nest it inside a TileContainer for a card surface. Example:
+  { "id": "root", "component": "Column", "align": "stretch",
+    "children": ["nameField", "emailField", "submitButton"] }
 
 # Hard rules
 - "component" MUST be one of the component names in the schemas below.
