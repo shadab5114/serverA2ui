@@ -93,6 +93,9 @@ export default function App() {
     return proc;
   }, []);
 
+  /** Tear down all known surfaces (used by the Clear button — a synchronous
+   *  click, so `surfaces` state is current here). The render path clears by
+   *  incoming surfaceId instead; see renderText. */
   const clearSurfaces = () => {
     surfaces.forEach((s) => {
       try {
@@ -107,7 +110,6 @@ export default function App() {
   /** Parse + render a raw JSON string. Returns true on success. */
   const renderText = (source: string): boolean => {
     setError(null);
-    clearSurfaces();
     if (!source.trim()) {
       setError("Paste some A2UI JSON first.");
       return false;
@@ -125,6 +127,23 @@ export default function App() {
       return false;
     }
     try {
+      // Drop any surface these messages will (re)create first, so re-rendering
+      // the same surfaceId doesn't hit "Surface <id> already exists". Derive the
+      // ids from the incoming messages, NOT from React state — the async
+      // generate() flow means `surfaces` can still be stale here. The
+      // processor's onSurfaceDeleted callback keeps the surface list in sync.
+      const surfaceIds = new Set(
+        messages
+          .filter((m) => m.createSurface?.surfaceId)
+          .map((m) => m.createSurface.surfaceId as string)
+      );
+      for (const id of surfaceIds) {
+        try {
+          processor.processMessages([{ version: "v0.9", deleteSurface: { surfaceId: id } }]);
+        } catch {
+          /* surface not present yet — nothing to delete */
+        }
+      }
       processor.processMessages(messages);
       return true;
     } catch (e: any) {

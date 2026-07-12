@@ -76,11 +76,19 @@ order:
 - A value bound to the data model is a DataBinding written inline:
       "text": { "path": "/user/name" }
   The path is a JSON Pointer: "/shoes/0/name"  (slashes + numeric indices).
-  NEVER use "shoes[0].name" — that is not a JSON Pointer.
+  Segments are ALWAYS separated by "/" — NEVER by ".". A dot anywhere in a path
+  (e.g. "/product.price", "/product.buyLabel") does NOT resolve and renders empty.
+  Correct: "/product/price". Wrong: "/product.price", "product.price", "shoes[0].name".
+  Every "/product/…" and every dotted key you'd write in JS becomes slash-separated.
 - A "DynamicString" property accepts a literal string OR a DataBinding object.
   Some props are themselves objects: e.g. a title may be
       "title": { "children": { "path": "/items/0/name" } }
   Follow each property's schema exactly (look at its $ref / type).
+- Controlled-state props — "value" (InputField/TextArea/Radio groups), "checked"
+  (Checkbox/Toggle) and "opened" (Modal) — are ALSO bindable (their schema is a
+  Dynamic* type). Binding them is TWO-WAY: the renderer writes the user's input
+  back to that path. Always seed the path in updateDataModel first. See
+  "# Interactivity" below.
 
 ## Children
 - Single child:        "child": "child-id"
@@ -97,6 +105,82 @@ order:
   no "componentId" is a DATA BINDING, not a child list; it renders NOTHING.
 - NEVER point "child"/"children" at a data-model path you did not seed in an
   updateDataModel message. Static child components are wired by id, not by data.
+
+# Interactivity: actions, forms & validation (A2UI dynamic behavior)
+Interactive components carry an "action" property (in the schemas: { "$ref":
+"#/$defs/Action" }; the Action, Dynamic* and CheckRule shapes are in $defs). An
+action is EITHER an "event" (handled by the AGENT) OR a "functionCall" (handled
+locally by the RENDERER). Validation lives in a SEPARATE sibling property,
+"checks" — NOT inside the action (see below).
+
+- Event → dispatched to the agent. Use for anything that needs server data,
+  persistence, or intelligence (e.g. submitting a form). The agent replies with
+  more A2UI messages.
+      "action": {
+        "event": {
+          "name": "submit_login",
+          "context": { "email": { "path": "/form/email" }, "remember": true }
+        }
+      }
+  "name" is a stable id the agent switches on. "context" values are literals or
+  { "path": ... } pulled from the data model (resolved before sending).
+
+- FunctionCall → runs instantly on the renderer, NO agent round-trip. Use for
+  pure UI mechanics (navigation, opening/closing a modal, toggling state).
+      "action": { "functionCall": { "call": "openUrl", "args": { "url": "https://..." } } }
+
+Renderer functions you may call (call name -> args):
+  - openUrl    { url }          open a link / navigate
+  - setData    { path, value }  write a value into the data model (JSON Pointer path)
+  - toggleData { path }          flip a boolean in the data model
+
+## Submitting a form (event) + two-way binding
+Bind each field's state prop to a data-model path, seed those paths, then submit
+with an event that reads them:
+  updateDataModel value: { "form": { "email": "", "password": "", "agree": false } }
+  fields:
+    { "id": "email", "component": "InputField", "label": "Email", "type": "email",
+      "value": { "path": "/form/email" } }
+    { "id": "agree", "component": "Checkbox", "label": "I accept the terms",
+      "checked": { "path": "/form/agree" } }
+  submit button:
+    { "id": "submit", "component": "Button", "children": "Sign in",
+      "action": { "event": { "name": "submit_login",
+        "context": { "email": { "path": "/form/email" },
+                     "password": { "path": "/form/password" } } } } }
+
+## Opening / closing a modal (functionCall, instant)
+Bind Modal "opened" to a boolean flag and flip it with setData:
+  updateDataModel value: { "ui": { "loginOpen": false } }
+  trigger:
+    { "id": "openBtn", "component": "Button", "children": "Sign in",
+      "action": { "functionCall": { "call": "setData",
+        "args": { "path": "/ui/loginOpen", "value": true } } } }
+  modal (its "children" references a component id, e.g. the form's root):
+    { "id": "loginModal", "component": "Modal", "opened": { "path": "/ui/loginOpen" },
+      "onClose": { "functionCall": { "call": "setData",
+        "args": { "path": "/ui/loginOpen", "value": false } } },
+      "children": "loginForm" }
+
+## Validating before submit ("checks")
+"checks" is a SIBLING of "action" on the component (NOT nested inside it). Each
+check BLOCKS the action and shows its "message" while its "condition" (a
+DynamicBoolean) is false. Bind the condition to a validity flag in the data model:
+  { "id": "submit", "component": "Button", "children": "Sign in",
+    "checks": [
+      { "condition": { "path": "/form/emailValid" }, "message": "Enter a valid email" },
+      { "condition": { "path": "/form/agree" },      "message": "You must accept the terms" }
+    ],
+    "action": { "event": { "name": "submit_login",
+                 "context": { "email": { "path": "/form/email" } } } } }
+
+## Which to use
+  - Navigate / open an external link .............. functionCall openUrl
+  - Open / close / toggle pure UI state ........... functionCall setData / toggleData
+  - Submit / anything the agent must handle ....... event  (+ checks to validate first)
+Only attach "action" to interactive components (Button, IconButton, TextLink,
+TextLinkCaret, TileContainer, Tilelet, ListGroupItem, and ButtonGroup items).
+Never invent function names beyond the list above.
 
 # Structure rules (a UI that does not follow these renders BLANK)
 - EXACTLY ONE component has "id": "root". It is the tree root.

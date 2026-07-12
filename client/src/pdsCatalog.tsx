@@ -53,6 +53,13 @@ const componentMap: Record<string, React.ElementType> = {
   CheckboxGroup: PDS.CheckboxGroup,
   RadioButton: PDS.RadioButton,
   RadioButtonGroup: PDS.RadioButtonGroup,
+  RadioBox: PDS.RadioBox,
+  RadioBoxGroup: PDS.RadioBoxGroup,
+  Toggle: PDS.Toggle,
+  TextArea: PDS.TextArea,
+  ListGroup: PDS.ListGroup,
+  ListGroupItem: PDS.ListGroupItem,
+  Modal: PDS.Modal,
   Notification: PDS.Notification,
 };
 

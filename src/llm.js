@@ -28,12 +28,18 @@ async function generateWithOpenAI(systemPrompt, userPrompt) {
   // input over a 30k TPM limit). 6k is ample for an A2UI document.
   const maxTokens = Number(process.env.OPENAI_MAX_TOKENS) || 6000;
 
+  // GPT-5 (and other reasoning models) renamed `max_tokens` -> `max_completion_tokens`
+  // and only accept the default temperature (1). Detect and adapt so the same
+  // code path works for gpt-4o-mini and gpt-5-mini alike.
+  const isReasoningModel = /^(gpt-5|o\d)/i.test(model);
+
   const completion = await client.chat.completions.create({
     model,
     // Force strict JSON output so the response is always parseable.
     response_format: { type: "json_object" },
-    temperature: 0.2,
-    max_tokens: maxTokens,
+    ...(isReasoningModel
+      ? { max_completion_tokens: maxTokens }
+      : { temperature: 0.2, max_tokens: maxTokens }),
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
