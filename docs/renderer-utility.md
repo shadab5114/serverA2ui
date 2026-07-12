@@ -1,0 +1,17 @@
+Then don't ship a renderer — ship layers, so teams adopt only what they need and mix freely. The guiding principle: you own the contract + portable behavior; the renderer is opt-in and swappable.
+
+Package it as 3 layers
+@ds/a2ui-catalog — catalog.json plus the shared interaction $defs as a publishable fragment (Action, CheckRule, Dynamic*, CatalogComponentCommon). This is the keystone for mixing: a team's custom component schemas allOf your fragment, so their components get action/checks/binding support — validating identically to yours. No renderer needed to benefit.
+@ds/a2ui-actions — framework-agnostic behavior: the function impls (setData/toggleData) + interaction helpers (runAction, isAction, checks evaluation, the two-way read map). Pure TS, no React. Any renderer — yours, theirs, Vue, whatever — calls these. This is where the non-obvious logic lives so nobody re-derives it.
+@ds/a2ui-react (optional reference renderer) — the React binding: component factory + reactivity, built on #2. Teams use it as-is, extend it with custom component impls, or ignore it.
+What makes mixed/custom scenarios work
+Extensible catalog + registry. A team builds one Catalog = your component impls + their custom impls, and one function registry = your functions + theirs. The A2UI catalog model is designed for exactly this merge — same namespace, one surface.
+A wiring helper, not full components. Expose a factory like wireComponent(reactComponent, { twoWay, closeAction }) that applies action/checks/two-way/reactivity generically and just asks for the per-component prop mapping. Custom components get first-class interactivity by supplying ~5 lines, not by copying your renderer.
+Keep your DS components A2UI-agnostic. Your React components stay plain React (no A2UI imports). The A2UI adapter is a separate layer that maps A2UI props → clean React props. This is critical: teams using your DS in a non-A2UI app pay nothing, and the same components work in both worlds.
+Publish a conformance spec. Document "to be a conformant renderer for this DS: run functionCall via the registry, dispatch event, gate on checks, two-way-bind these props, ensure reactivity." Teams with their own renderer build against #2 + this doc (which is basically docs/a2ui-interactivity.md) and stay compatible.
+The two things to get right
+Version the fragment + functions together (schema and behavior must not drift), but keep @ds/a2ui-react a separate release with React/@a2ui as peer deps — so a team on the generic-binder path or a different framework isn't forced onto your React version.
+Make reactivity pluggable, not baked in. Some renderers (generic binder) already handle it; expose it as an optional wrapper so it's not dead weight.
+Net: you provide catalog.json + a fragment (contract), a pure-TS behavior pack (portable), and a reference React renderer (convenience). Enterprise teams compose their custom components and their own renderer against the first two, and reach for the third only if it fits.
+
+Want me to refactor the current pdsCatalog.tsx into this layered shape — pulling the framework-agnostic helpers (runAction/isAction/functions/two-way map) out of the React file and exposing a wireComponent factory?
