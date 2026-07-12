@@ -18,7 +18,8 @@ import React from "react";
 import * as PDS from "@shadab5114/pds-core";
 import * as Schemas from "@shadab5114/pds-core/schemas";
 import { createBinderlessComponentImplementation, basicCatalog } from "@a2ui/react/v0_9";
-import { Catalog } from "@a2ui/web_core/v0_9";
+import { Catalog, createFunctionImplementation } from "@a2ui/web_core/v0_9";
+import { z } from "zod";
 
 /** Catalog name the renderer registers under (surfaces bind to it by id). */
 export const CATALOG_NAME = "pds";
@@ -77,6 +78,9 @@ const isObject = (v: any) => v != null && typeof v === "object" && !Array.isArra
 
 /** A2UI data binding: `{ path }` (but not a child template). */
 const isBinding = (v: any) => isObject(v) && "path" in v && !("componentId" in v);
+
+/** A2UI Action value: has an `event` or `functionCall` (e.g. Modal `onClose`). */
+const isAction = (v: any) => isObject(v) && ("functionCall" in v || "event" in v);
 
 /** A2UI child template: `{ componentId, path }` — repeat over a data array. */
 const isTemplate = (v: any) => isObject(v) && "componentId" in v && "path" in v;
@@ -138,6 +142,84 @@ function resolveChildren(value: any, dc: any, buildChild: any): React.ReactNode 
   return null;
 }
 
+// ---- interactivity (actions + two-way binding) ----------------------------
+
+/** Components whose action fires on close/dismiss (onClose) rather than click. */
+const CLOSE_ACTION = new Set(["Modal", "Notification"]);
+
+/**
+ * Two-way-bindable form controls: when the control's state prop is a
+ * DataBinding, we render it UNCONTROLLED (defaultValue/defaultChecked) and push
+ * each change into the data model. Binderless components don't re-render on data
+ * changes, so a controlled `value` would freeze the field; uncontrolled + a
+ * write-back keeps typing native AND the model current for later reads.
+ */
+const TWO_WAY: Record<string, { prop: string; defaultProp: string; read: (arg: any) => any }> = {
+  InputField: { prop: "value", defaultProp: "defaultValue", read: (e) => e?.target?.value },
+  TextArea: { prop: "value", defaultProp: "defaultValue", read: (e) => e?.target?.value },
+  Checkbox: { prop: "checked", defaultProp: "defaultChecked", read: (e) => e?.target?.checked },
+  Toggle: { prop: "checked", defaultProp: "defaultChecked", read: (e) => e?.target?.checked },
+};
+
+/**
+ * Run a component's A2UI action, gated by its sibling `checks`:
+ *   - functionCall  -> executed locally via the data context (e.g. `openUrl`).
+ *   - event         -> context paths resolved, then dispatched to the agent
+ *                      (surfaces on the MessageProcessor's action handler).
+ */
+function runAction(actionSpec: any, checks: any, context: any, dc: any) {
+  if (Array.isArray(checks)) {
+    for (const chk of checks) {
+      let ok = true;
+      try {
+        ok = !!dc.resolveDynamicValue(chk?.condition);
+      } catch {
+        ok = false;
+      }
+      if (!ok) {
+        if (typeof window !== "undefined") window.alert(chk?.message || "Validation failed");
+        return; // gate failed — block the action
+      }
+    }
+  }
+  try {
+    if (actionSpec?.functionCall) {
+      dc.resolveDynamicValue(actionSpec.functionCall);
+    } else if (actionSpec?.event) {
+      context.dispatchAction(dc.resolveAction(actionSpec));
+    }
+  } catch (err) {
+    console.error("[a2ui] action failed:", err);
+  }
+}
+
+// ---- renderer functions (local FunctionCall handlers) ---------------------
+
+/**
+ * Design-system renderer functions callable from `action.functionCall`.
+ * `openUrl` (+ validation/logic helpers) already come from the basic catalog;
+ * these add local data-model mutation so a UI can drive its own state (open a
+ * modal, flip a toggle) with no agent round-trip. `execute(args, ctx)` receives
+ * the triggering component's DataContext — `ctx.set(path, value)` writes back
+ * into the surface data model (paths are JSON Pointers).
+ */
+const setDataFn = createFunctionImplementation(
+  { name: "setData", returnType: "void", schema: z.object({ path: z.string(), value: z.any() }) } as any,
+  (args: any, ctx: any) => {
+    ctx.set(args.path, args.value);
+  }
+);
+
+const toggleDataFn = createFunctionImplementation(
+  { name: "toggleData", returnType: "void", schema: z.object({ path: z.string() }) } as any,
+  (args: any, ctx: any) => {
+    ctx.set(args.path, !ctx.resolveDynamicValue({ path: args.path }));
+  }
+);
+
+/** DS-provided functions merged on top of the basic catalog's functions. */
+const PDS_FUNCTIONS = [setDataFn, toggleDataFn];
+
 // ---- catalog component factory --------------------------------------------
 
 function makeImplementation(name: string) {
@@ -149,6 +231,28 @@ function makeImplementation(name: string) {
     const raw: Record<string, any> = context?.componentModel?.properties || {};
     const dc = context.dataContext;
 
+    // Re-render this component on ANY data-model change so one-shot resolved
+    // bindings (Modal.opened, bound text, an input's value) reflect writes made
+    // by setData / dc.set. Binderless components otherwise only re-render on
+    // component create/delete, so a bound `opened` flag would never update the
+    // Modal. Subscribing to "/" catches every set (each set notifies ancestors
+    // up to the root).
+    const dataModel = dc.dataModel;
+    const store = React.useMemo(() => {
+      let version = 0;
+      return {
+        subscribe: (cb: () => void) => {
+          const sub = dataModel.subscribe("/", () => {
+            version++;
+            cb();
+          });
+          return () => sub.unsubscribe();
+        },
+        getSnapshot: () => version,
+      };
+    }, [dataModel]);
+    React.useSyncExternalStore(store.subscribe, store.getSnapshot);
+
     // Does a string name an actual component on this surface? Used to tell a
     // single child reference (`children: "signup-form"`) apart from text
     // content (`children: "Submit"`).
@@ -157,8 +261,26 @@ function makeImplementation(name: string) {
 
     const props: Record<string, any> = {};
     let childrenNode: React.ReactNode = undefined;
+    let actionSpec: any = null;
+    let checksSpec: any = null;
+    const twoWay = TWO_WAY[name];
 
     for (const [key, value] of Object.entries(raw)) {
+      // Interaction props are handled below, not passed to the pds component.
+      if (key === "action") {
+        actionSpec = value;
+        continue;
+      }
+      if (key === "checks") {
+        checksSpec = value;
+        continue;
+      }
+      // A prop whose VALUE is an Action (e.g. Modal/Notification `onClose`)
+      // becomes a handler that runs it — not passed through as an object.
+      if (isAction(value)) {
+        props[key] = () => runAction(value, null, context, dc);
+        continue;
+      }
       if (key === "child") {
         // Single child reference (a component id string).
         childrenNode = typeof value === "string" ? buildChild(value) : null;
@@ -176,7 +298,27 @@ function makeImplementation(name: string) {
         }
         continue;
       }
+      // Two-way binding: a bound state prop (value/checked) renders uncontrolled
+      // and writes each change back to the data model. See TWO_WAY.
+      if (twoWay && key === twoWay.prop && isBinding(value)) {
+        const bindPath = (value as any).path;
+        props[twoWay.defaultProp] = resolveValue(value, dc);
+        props.onChange = (arg: any) => {
+          try {
+            dc.set(bindPath, twoWay.read(arg));
+          } catch {
+            /* ignore write failures */
+          }
+        };
+        continue;
+      }
       props[key] = resolveValue(value, dc);
+    }
+
+    // Wire the action to the component's click / close handler.
+    if (actionSpec) {
+      const handler = CLOSE_ACTION.has(name) ? "onClose" : "onClick";
+      props[handler] = () => runAction(actionSpec, checksSpec, context, dc);
     }
 
     if (!Component) {
@@ -205,7 +347,9 @@ export function createPdsCatalog() {
   const layoutImpls = [...basicCatalog.components.values()].filter(
     (impl: any) => FALLBACK_LAYOUT.includes(impl.name) && !pdsNames.has(impl.name)
   );
-  const functions = [...basicCatalog.functions.values()];
+  // Basic-catalog functions (openUrl + validation/logic/format) plus our
+  // DS-provided data-model mutators (setData / toggleData).
+  const functions = [...basicCatalog.functions.values(), ...PDS_FUNCTIONS];
   return new Catalog(CATALOG_NAME, [...pdsImpls, ...layoutImpls], functions as any);
 }
 

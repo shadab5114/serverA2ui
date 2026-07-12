@@ -13,7 +13,7 @@
     "@a2ui/react": "0.9.1",
     "@a2ui/web_core": "0.9.1",
     "@shadab5114/pdesign-tokens": "^1.0.0-alpha.2",
-    "@shadab5114/pds-core": "1.0.0-alpha.6",
+    "@shadab5114/pds-core": "1.0.0-alpha.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "zod": "^4.4.3"

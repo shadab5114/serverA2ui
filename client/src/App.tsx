@@ -83,7 +83,15 @@ export default function App() {
 
   // One processor, holding our pds catalog.
   const processor = useMemo(() => {
-    const proc = new MessageProcessor([createPdsCatalog()], () => {});
+    // 2nd arg is the action sink: A2UI `event` actions dispatched by components
+    // land here (this is where a real app would call its agent). For now, show
+    // the resolved action so event wiring is observable.
+    const proc = new MessageProcessor([createPdsCatalog()], (action: any) => {
+      console.log("[a2ui event]", action);
+      window.alert(
+        `Event dispatched: ${action?.name}\ncontext: ${JSON.stringify(action?.context ?? {}, null, 2)}`
+      );
+    });
     proc.onSurfaceCreated((surface: any) => {
       setSurfaces((prev) => [...prev.filter((s) => s.id !== surface.id), surface]);
     });
