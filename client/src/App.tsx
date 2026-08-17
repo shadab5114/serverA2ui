@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { A2uiSurface } from "@a2ui/react/v0_9";
 import { MessageProcessor } from "@a2ui/web_core/v0_9";
 import { createPdsCatalog, CATALOG_NAME } from "./pdsCatalog";
+import Chat from "./Chat";
 
 const SAMPLE = JSON.stringify(
   {
@@ -80,6 +81,7 @@ export default function App() {
   const [surfaces, setSurfaces] = useState<any[]>([]);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState<"ui" | "chat">("ui");
 
   // One processor, holding our pds catalog.
   const processor = useMemo(() => {
@@ -196,8 +198,20 @@ export default function App() {
       <header className="topbar">
         <h1>A2UI Renderer</h1>
         <span className="sub">describe a UI → generate → preview with @shadab5114/pds-core</span>
+        <nav className="tabs">
+          <button className={`tab ${tab === "ui" ? "active" : ""}`} onClick={() => setTab("ui")}>
+            Generate UI
+          </button>
+          <button className={`tab ${tab === "chat" ? "active" : ""}`} onClick={() => setTab("chat")}>
+            Chat
+          </button>
+        </nav>
       </header>
 
+      {tab === "chat" && <Chat />}
+
+      {tab === "ui" && (
+      <>
       <div className="promptbar">
         <input
           className="prompt-input"
@@ -255,6 +269,8 @@ export default function App() {
           </div>
         </section>
       </div>
+      </>
+      )}
     </div>
   );
 }

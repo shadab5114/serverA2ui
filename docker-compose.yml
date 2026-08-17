@@ -1,0 +1,27 @@
+# Phase 3b — Postgres for the LangGraph checkpointer (durable chat memory).
+# Start with:  npm run db:up   (docker compose up -d)
+# Stop with:   npm run db:down
+#
+# Connection string (already in .env):
+#   DATABASE_URL=postgres://a2ui:a2ui@localhost:5432/a2ui
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: a2ui-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: a2ui
+      POSTGRES_PASSWORD: a2ui
+      POSTGRES_DB: a2ui
+    ports:
+      - "5432:5432"
+    volumes:
+      - a2ui-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U a2ui -d a2ui"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  a2ui-pgdata:

@@ -129,3 +129,53 @@ body {
   padding: 2rem;
   text-align: center;
 }
+
+/* --- Tabs (Phase 3) --------------------------------------------------- */
+.topbar .tabs { margin-left: auto; display: flex; gap: 0.35rem; }
+.tab {
+  background: transparent;
+  border: 1px solid #3a3a3a;
+  color: #cfcfcf;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.tab:hover { background: #1e1e1e; }
+.tab.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+
+/* --- Chat panel (Phase 3) -------------------------------------------- */
+.chat { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.chat-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+}
+.chat-thread { font-size: 0.78rem; color: #6b7280; font-family: ui-monospace, monospace; }
+.chat-head .btn { margin-left: auto; padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+
+.chat-log { flex: 1; overflow: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem; }
+
+.bubble { max-width: 72%; padding: 0.6rem 0.85rem; border-radius: 12px; font-size: 0.92rem; }
+.bubble .who { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.6; margin-bottom: 0.2rem; }
+.bubble .text { white-space: pre-wrap; }
+.bubble .text.status { opacity: 0.6; font-style: italic; }
+.bubble .surface { margin-top: 0.5rem; }
+/* A rendered surface needs room — let bubbles that carry one grow wide. */
+.bubble.has-surface { max-width: 92%; width: 100%; }
+.bubble.user { align-self: flex-end; background: #2563eb; color: #fff; }
+.bubble.user .who { color: #dbeafe; }
+.bubble.assistant { align-self: flex-start; background: #fff; border: 1px solid #e5e7eb; }
+
+.chat-input { display: flex; gap: 0.6rem; padding: 0.75rem 1.25rem; border-top: 1px solid #e5e7eb; background: #fff; }
+.chat-input input {
+  flex: 1;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.92rem;
+}
+.chat-input input:focus { outline: none; border-color: #2563eb; }

@@ -17,6 +17,8 @@ export default defineConfig({
     proxy: {
       "/generate": { target: process.env.API_TARGET || "http://localhost:8080", changeOrigin: true },
       "/health": { target: process.env.API_TARGET || "http://localhost:8080", changeOrigin: true },
+      // Phase 3: AG-UI SSE endpoint (LangGraph chat) on the agui server.
+      "/agui": { target: process.env.AGUI_TARGET || "http://localhost:8090", changeOrigin: true },
     },
   },
 });
