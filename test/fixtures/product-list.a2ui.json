@@ -1,0 +1,86 @@
+{
+  "$comment": "GOLDEN FIXTURE — captured from the real validator-gated generator. Shared conformance input for every A2UI renderer. Regenerate with `npm run fixtures`, only deliberately.",
+  "name": "product-list",
+  "description": "Data-bound list: updateDataModel seeds an array and root uses a { path, componentId } child template. Exercises JSON-Pointer bindings and relative paths inside a repeated template.",
+  "prompt": "Show a list of 3 products, each with a name, a price and a short description, rendered as tiles from a data model.",
+  "capturedAt": "2026-09-18T10:08:47.875Z",
+  "generator": {
+    "provider": "openai",
+    "model": "gpt-5-mini"
+  },
+  "a2ui": [
+    {
+      "version": "v0.9",
+      "createSurface": {
+        "surfaceId": "main",
+        "catalogId": "https://pdesign.dev/catalog/v1/catalog.json"
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateDataModel": {
+        "surfaceId": "main",
+        "path": "/",
+        "value": {
+          "products": [
+            {
+              "name": "Everyday Water Bottle",
+              "price": "$19.99",
+              "description": "Lightweight, leak-proof bottle with a comfortable grip — keeps drinks cold for 24 hours."
+            },
+            {
+              "name": "Noise-Reducing Headphones",
+              "price": "$129.00",
+              "description": "Over-ear headphones with active noise cancellation and long battery life for travel and work."
+            },
+            {
+              "name": "Compact Travel Umbrella",
+              "price": "$24.50",
+              "description": "Durable, wind-resistant umbrella that folds small enough to fit in your bag."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "product-tile",
+            "component": "Tilelet",
+            "title": {
+              "children": {
+                "path": "name"
+              }
+            },
+            "subtitle": {
+              "children": {
+                "path": "price"
+              }
+            },
+            "children": {
+              "path": "description"
+            },
+            "textAlignment": "left",
+            "textPosition": "top",
+            "padding": "4X",
+            "background": "lightSecondary",
+            "surface": "lightPrimary"
+          },
+          {
+            "id": "root",
+            "component": "List",
+            "direction": "vertical",
+            "align": "stretch",
+            "children": {
+              "path": "/products",
+              "componentId": "product-tile"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

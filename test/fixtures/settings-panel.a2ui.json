@@ -1,0 +1,161 @@
+{
+  "$comment": "GOLDEN FIXTURE — captured from the real validator-gated generator. Shared conformance input for every A2UI renderer. Regenerate with `npm run fixtures`, only deliberately.",
+  "name": "settings-panel",
+  "description": "Interactive surface: toggles/checkboxes bound two-way to the data model plus a button carrying an action. Exercises two-way binding and action dispatch.",
+  "prompt": "Build a notification settings panel with a heading, a toggle for email alerts, a toggle for push alerts, a checkbox to agree to terms, and a Save button that submits the settings.",
+  "capturedAt": "2026-09-18T10:09:36.683Z",
+  "generator": {
+    "provider": "openai",
+    "model": "gpt-5-mini"
+  },
+  "a2ui": [
+    {
+      "version": "v0.9",
+      "createSurface": {
+        "surfaceId": "main",
+        "catalogId": "https://pdesign.dev/catalog/v1/catalog.json"
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateDataModel": {
+        "surfaceId": "main",
+        "path": "/",
+        "value": {
+          "settings": {
+            "emailAlerts": false,
+            "pushAlerts": false,
+            "agreeTerms": false
+          }
+        }
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "root",
+            "component": "Column",
+            "align": "stretch",
+            "children": [
+              "heading",
+              "emailRow",
+              "pushRow",
+              "agreeCheckbox",
+              "saveRow"
+            ]
+          },
+          {
+            "id": "heading",
+            "component": "Text",
+            "children": "Notification settings",
+            "kind": "title",
+            "size": "xlarge",
+            "primitive": "h2"
+          },
+          {
+            "id": "emailRow",
+            "component": "Row",
+            "justify": "spaceBetween",
+            "align": "center",
+            "children": [
+              "emailLabel",
+              "emailToggle"
+            ]
+          },
+          {
+            "id": "emailLabel",
+            "component": "Text",
+            "children": "Email alerts",
+            "kind": "body",
+            "size": "large",
+            "primitive": "span"
+          },
+          {
+            "id": "emailToggle",
+            "component": "Toggle",
+            "checked": {
+              "path": "/settings/emailAlerts"
+            },
+            "ariaLabel": "Enable email alerts"
+          },
+          {
+            "id": "pushRow",
+            "component": "Row",
+            "justify": "spaceBetween",
+            "align": "center",
+            "children": [
+              "pushLabel",
+              "pushToggle"
+            ]
+          },
+          {
+            "id": "pushLabel",
+            "component": "Text",
+            "children": "Push alerts",
+            "kind": "body",
+            "size": "large",
+            "primitive": "span"
+          },
+          {
+            "id": "pushToggle",
+            "component": "Toggle",
+            "checked": {
+              "path": "/settings/pushAlerts"
+            },
+            "ariaLabel": "Enable push alerts"
+          },
+          {
+            "id": "agreeCheckbox",
+            "component": "Checkbox",
+            "label": "I agree to the terms and conditions",
+            "checked": {
+              "path": "/settings/agreeTerms"
+            }
+          },
+          {
+            "id": "saveRow",
+            "component": "Row",
+            "justify": "center",
+            "children": [
+              "saveButton"
+            ]
+          },
+          {
+            "id": "saveButton",
+            "component": "Button",
+            "children": "Save",
+            "kind": "primary",
+            "size": "large",
+            "checks": [
+              {
+                "condition": {
+                  "path": "/settings/agreeTerms"
+                },
+                "message": "You must agree to the terms to save."
+              }
+            ],
+            "action": {
+              "event": {
+                "name": "save_notification_settings",
+                "context": {
+                  "emailAlerts": {
+                    "path": "/settings/emailAlerts"
+                  },
+                  "pushAlerts": {
+                    "path": "/settings/pushAlerts"
+                  },
+                  "agreeTerms": {
+                    "path": "/settings/agreeTerms"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

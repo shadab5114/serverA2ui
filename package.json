@@ -11,7 +11,8 @@
     "agui:dev": "node --watch agui/server.js",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "test": "node --test test/"
+    "test": "node --test \"test/**/*.test.mjs\"",
+    "fixtures": "node scripts/generate-fixtures.mjs"
   },
   "dependencies": {
     "@ag-ui/core": "^0.0.57",

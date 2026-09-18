@@ -1,0 +1,115 @@
+{
+  "$comment": "GOLDEN FIXTURE — captured from the real validator-gated generator. Shared conformance input for every A2UI renderer. Regenerate with `npm run fixtures`, only deliberately.",
+  "name": "signup-form",
+  "description": "Static form: layout container, labelled input fields and a submit button. Exercises children-as-text (button label) vs children-as-component-ids, and form controls.",
+  "prompt": "Create a sign-up form with a title, a full name field, an email field, a password field, and a submit button.",
+  "capturedAt": "2026-09-18T10:08:29.201Z",
+  "generator": {
+    "provider": "openai",
+    "model": "gpt-5-mini"
+  },
+  "a2ui": [
+    {
+      "version": "v0.9",
+      "createSurface": {
+        "surfaceId": "main",
+        "catalogId": "https://pdesign.dev/catalog/v1/catalog.json"
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateDataModel": {
+        "surfaceId": "main",
+        "path": "/",
+        "value": {
+          "form": {
+            "fullName": "",
+            "email": "",
+            "password": ""
+          }
+        }
+      }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          {
+            "id": "root",
+            "component": "Column",
+            "align": "stretch",
+            "children": [
+              "title",
+              "fullNameField",
+              "emailField",
+              "passwordField",
+              "submitButton"
+            ]
+          },
+          {
+            "id": "title",
+            "component": "Text",
+            "children": "Create an account",
+            "kind": "title",
+            "size": "large",
+            "primitive": "h2",
+            "bold": true
+          },
+          {
+            "id": "fullNameField",
+            "component": "InputField",
+            "label": "Full name",
+            "placeholder": "Jane Doe",
+            "value": {
+              "path": "/form/fullName"
+            }
+          },
+          {
+            "id": "emailField",
+            "component": "InputField",
+            "type": "email",
+            "label": "Email",
+            "placeholder": "you@example.com",
+            "value": {
+              "path": "/form/email"
+            }
+          },
+          {
+            "id": "passwordField",
+            "component": "InputField",
+            "type": "password",
+            "label": "Password",
+            "placeholder": "Choose a secure password",
+            "value": {
+              "path": "/form/password"
+            }
+          },
+          {
+            "id": "submitButton",
+            "component": "Button",
+            "children": "Sign up",
+            "kind": "primary",
+            "size": "large",
+            "action": {
+              "event": {
+                "name": "submit_signup",
+                "context": {
+                  "fullName": {
+                    "path": "/form/fullName"
+                  },
+                  "email": {
+                    "path": "/form/email"
+                  },
+                  "password": {
+                    "path": "/form/password"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
