@@ -12,11 +12,12 @@ export default defineConfig({
     port: 5176,
     strictPort: true,
     fs: { strict: false },
-    // Proxy /generate (and /health) to the A2UI generation server so the client
+    // Proxy /generate (and /health) to the A2UI generation server (the Python
+    // backend on :8090 since P4, decision D1) so the client
     // can call it same-origin and avoid CORS. Override the target with API_TARGET.
     proxy: {
-      "/generate": { target: process.env.API_TARGET || "http://localhost:8080", changeOrigin: true },
-      "/health": { target: process.env.API_TARGET || "http://localhost:8080", changeOrigin: true },
+      "/generate": { target: process.env.API_TARGET || "http://localhost:8090", changeOrigin: true },
+      "/health": { target: process.env.API_TARGET || "http://localhost:8090", changeOrigin: true },
       // Phase 3: AG-UI SSE endpoint (LangGraph chat) on the agui server.
       "/agui": { target: process.env.AGUI_TARGET || "http://localhost:8090", changeOrigin: true },
     },

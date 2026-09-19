@@ -1,0 +1,38 @@
+{
+  "a2ui": [
+    {
+      "version": "v0.9",
+      "createSurface": { "surfaceId": "main", "catalogId": "https://pdesign.dev/catalog/v1/catalog.json" }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          { "id": "root", "component": "Column", "align": "stretch", "children": ["orders-heading", "orders-summary", "order-list", "orders-fine-print"] },
+          { "id": "orders-heading", "component": "Text", "kind": "title", "size": "large", "bold": true, "primitive": "h2", "children": "Your orders" },
+          { "id": "orders-summary", "component": "Text", "kind": "body", "size": "medium", "children": { "path": "/summary" } },
+          { "id": "order-list", "component": "Column", "align": "stretch", "children": { "path": "/orders", "componentId": "order-tile" } },
+          {
+            "id": "order-tile",
+            "component": "ComposableTileContainer",
+            "showBorder": true,
+            "height": "auto",
+            "cap": { "children": { "path": "status" }, "backgroundColor": "black" },
+            "header": {
+              "title": { "children": { "path": "number" }, "size": "titleSmall", "bold": true },
+              "subtitle": { "children": { "path": "totalLabel" }, "size": "bodyLarge" }
+            },
+            "children": "order-body"
+          },
+          { "id": "order-body", "component": "Column", "align": "stretch", "children": ["order-status", "order-placed", "order-items"] },
+          { "id": "order-status", "component": "Text", "kind": "body", "size": "medium", "bold": true, "children": { "path": "statusDetail" } },
+          { "id": "order-placed", "component": "Text", "kind": "body", "size": "small", "children": { "path": "placedLabel" } },
+          { "id": "order-items", "component": "Column", "children": { "path": "items", "componentId": "order-item" } },
+          { "id": "order-item", "component": "Text", "kind": "body", "size": "small", "children": { "path": "label" } },
+          { "id": "orders-fine-print", "component": "Text", "kind": "body", "size": "xsmall", "children": "Illustrative orders for this playground, not real purchases." }
+        ]
+      }
+    }
+  ]
+}

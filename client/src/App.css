@@ -168,7 +168,63 @@ body {
 .bubble.has-surface { max-width: 92%; width: 100%; }
 .bubble.user { align-self: flex-end; background: #2563eb; color: #fff; }
 .bubble.user .who { color: #dbeafe; }
+/* A user turn that came from clicking something in a surface (P6). */
+.bubble.user.action { background: #eff6ff; color: #1e3a8a; border: 1px dashed #93c5fd; }
+.bubble.user.action .who { color: #3b82f6; }
 .bubble.assistant { align-self: flex-start; background: #fff; border: 1px solid #e5e7eb; }
+
+/* Trace panel (P7): steps and traced calls under an assistant turn. */
+.trace { margin-top: 0.6rem; border-top: 1px solid #f1f5f9; padding-top: 0.4rem; font-size: 0.78rem; color: #475569; }
+.trace > summary { cursor: pointer; color: #64748b; user-select: none; }
+.trace-list { list-style: none; margin: 0.4rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.3rem; }
+.trace-step { margin-top: 0.35rem; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; }
+.trace-tool { padding-left: 0.6rem; border-left: 2px solid #e2e8f0; }
+.trace-tool.running { border-left-color: #93c5fd; }
+.trace-tool.flagged { border-left-color: #f59e0b; }
+.trace-toggle { all: unset; cursor: pointer; display: flex; gap: 0.5rem; align-items: baseline; }
+.trace-toggle code { font-size: 0.74rem; color: #1e293b; background: #f1f5f9; padding: 0 0.3rem; border-radius: 4px; white-space: nowrap; }
+.trace-summary { color: #334155; }
+.trace-note { color: #94a3b8; font-style: italic; }
+.trace-sources { list-style: none; margin: 0.2rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 0.6rem; }
+.trace-cite { font-weight: 600; color: #1d4ed8; }
+.trace-origin { color: #94a3b8; }
+.trace-json { margin: 0.3rem 0 0; max-height: 16rem; overflow: auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.4rem; font-size: 0.7rem; white-space: pre-wrap; }
+
+/* Persona switch (P8): sent as state.persona on every run. */
+.persona-switch { display: inline-flex; border: 1px solid #d1d5db; border-radius: 999px; overflow: hidden; }
+.persona-switch button {
+  all: unset; cursor: pointer; padding: 0.22rem 0.75rem; font-size: 0.78rem; color: #374151;
+}
+.persona-switch button + button { border-left: 1px solid #d1d5db; }
+.persona-switch button.active { background: #111827; color: #fff; }
+.persona-switch button:disabled { cursor: default; opacity: 0.6; }
+.persona-switch button:focus-visible { outline: 2px solid #2563eb; outline-offset: -2px; }
+
+/* Variant cards (P8): explorer chrome around a baseline, a variant or a generated surface. */
+.variant-card { margin-top: 0.6rem; border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.6rem 0.75rem; background: #fcfcfd; }
+.variant-card.baseline { border-color: #cbd5e1; background: #f8fafc; }
+.variant-card.variant { border-color: #c7d2fe; }
+.variant-card.flagged { border-color: #fcd34d; }
+.variant-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; }
+.variant-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #3730a3; }
+.variant-card.baseline .variant-label { color: #334155; }
+.variant-title { font-weight: 600; color: #111827; }
+.variant-base { font-size: 0.74rem; color: #94a3b8; }
+.variant-rationale { margin: 0.25rem 0 0; font-size: 0.84rem; color: #475569; }
+.variant-card .surface { margin: 0.5rem 0 0; background: #fff; border-radius: 6px; }
+.variant-flags { list-style: none; margin: 0.5rem 0 0; padding: 0.45rem 0.6rem; background: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; font-size: 0.8rem; color: #78350f; }
+.variant-flags li + li { margin-top: 0.25rem; }
+.variant-fix { color: #92400e; font-style: italic; }
+.variant-missing { margin-top: 0.5rem; font-size: 0.8rem; color: #7c2d12; }
+.variant-missing code { background: #ffedd5; padding: 0 0.3rem; border-radius: 4px; }
+.variant-why { color: #9a3412; }
+.variant-foot { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem 1.5rem; font-size: 0.78rem; color: #475569; }
+.variant-key { display: block; font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.1rem; }
+.variant-changes ul { margin: 0; padding-left: 1.1rem; }
+.variant-sources { display: flex; flex-direction: column; }
+.variant-cite { font-weight: 600; color: #1d4ed8; }
+.variant-toggle { all: unset; cursor: pointer; color: #2563eb; font-size: 0.74rem; margin-top: 0.2rem; }
+.variant-toggle:focus-visible { outline: 2px solid #2563eb; }
 
 .chat-input { display: flex; gap: 0.6rem; padding: 0.75rem 1.25rem; border-top: 1px solid #e5e7eb; background: #fff; }
 .chat-input input {

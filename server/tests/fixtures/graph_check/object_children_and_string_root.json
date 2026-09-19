@@ -1,0 +1,108 @@
+{
+  "input": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": "a"
+            },
+            {
+              "id": "a",
+              "component": "Row",
+              "children": [
+                {
+                  "id": "b"
+                },
+                "c"
+              ]
+            },
+            {
+              "id": "b",
+              "component": "Button",
+              "children": "B"
+            },
+            {
+              "id": "c",
+              "component": "Button",
+              "children": "C"
+            },
+            {
+              "id": "d",
+              "component": "Divider"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "output": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "a",
+                "d"
+              ]
+            },
+            {
+              "id": "a",
+              "component": "Row",
+              "children": [
+                {
+                  "id": "b"
+                },
+                "c"
+              ]
+            },
+            {
+              "id": "b",
+              "component": "Button",
+              "children": "B"
+            },
+            {
+              "id": "c",
+              "component": "Button",
+              "children": "C"
+            },
+            {
+              "id": "d",
+              "component": "Divider"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "result": {
+    "repaired": true,
+    "warnings": [
+      "Attached 1 orphan component(s) to root: d."
+    ],
+    "errors": []
+  }
+}

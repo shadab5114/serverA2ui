@@ -1,0 +1,81 @@
+{
+  "input": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "email",
+                "submit"
+              ]
+            },
+            {
+              "id": "email",
+              "component": "InputField",
+              "label": "Email"
+            },
+            {
+              "id": "submit",
+              "component": "Button",
+              "children": "Sign in"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "output": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "email",
+                "submit"
+              ]
+            },
+            {
+              "id": "email",
+              "component": "InputField",
+              "label": "Email"
+            },
+            {
+              "id": "submit",
+              "component": "Button",
+              "children": "Sign in"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "result": {
+    "repaired": false,
+    "warnings": [],
+    "errors": []
+  }
+}

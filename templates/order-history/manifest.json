@@ -1,0 +1,24 @@
+{
+  "id": "order-history",
+  "version": 1,
+  "title": "Order history",
+  "intent": "Show the customer's orders, newest first, each with its status, total, date and items, optionally filtered by status, total, date, a product in the order, or only the latest few",
+  "examples": [
+    "show my orders",
+    "where are my orders?",
+    "my delivered orders",
+    "orders over $100",
+    "did I order a charging cable?",
+    "my last 3 orders"
+  ],
+  "personas": [
+    "assistant",
+    "explorer"
+  ],
+  "data": {
+    "provider": "orders.list"
+  },
+  "caption": "Here are your orders.",
+  "events": {},
+  "suggestedNext": []
+}

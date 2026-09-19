@@ -1,0 +1,34 @@
+{
+  "a2ui": [
+    {
+      "version": "v0.9",
+      "createSurface": { "surfaceId": "main", "catalogId": "https://pdesign.dev/catalog/v1/catalog.json" }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          { "id": "root", "component": "Column", "align": "stretch", "children": ["addons-heading", "addons-summary", "addon-list", "addons-continue"] },
+          { "id": "addons-heading", "component": "Text", "kind": "title", "size": "large", "bold": true, "primitive": "h2", "children": { "path": "/heading" } },
+          { "id": "addons-summary", "component": "Text", "kind": "body", "size": "medium", "children": { "path": "/summary" } },
+          { "id": "addon-list", "component": "Column", "align": "stretch", "children": { "path": "/addons", "componentId": "addon-item" } },
+          {
+            "id": "addon-item",
+            "component": "Checkbox",
+            "label": { "path": "name" },
+            "sublabel": { "path": "detail" },
+            "checked": { "path": "selected" }
+          },
+          {
+            "id": "addons-continue",
+            "component": "Button",
+            "kind": "primary",
+            "children": "Continue",
+            "action": { "event": { "name": "confirm_addons", "context": { "planId": { "path": "/planId" }, "addons": { "path": "/addons" } } } }
+          }
+        ]
+      }
+    }
+  ]
+}

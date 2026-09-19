@@ -1,0 +1,93 @@
+{
+  "input": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "a"
+              ]
+            },
+            {
+              "id": "a",
+              "component": "Button",
+              "children": "A"
+            },
+            {
+              "id": "b",
+              "component": "Button",
+              "children": "B"
+            },
+            {
+              "id": "c",
+              "component": "Text",
+              "children": "C"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "output": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "a",
+                "b",
+                "c"
+              ]
+            },
+            {
+              "id": "a",
+              "component": "Button",
+              "children": "A"
+            },
+            {
+              "id": "b",
+              "component": "Button",
+              "children": "B"
+            },
+            {
+              "id": "c",
+              "component": "Text",
+              "children": "C"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "result": {
+    "repaired": true,
+    "warnings": [
+      "Attached 2 orphan component(s) to root: b, c."
+    ],
+    "errors": []
+  }
+}

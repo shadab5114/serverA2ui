@@ -1,0 +1,82 @@
+{
+  "input": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": {
+                "path": "form"
+              }
+            },
+            {
+              "id": "name",
+              "component": "InputField",
+              "label": "Name"
+            },
+            {
+              "id": "go",
+              "component": "Button",
+              "children": "Go"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "output": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "name",
+                "go"
+              ]
+            },
+            {
+              "id": "name",
+              "component": "InputField",
+              "label": "Name"
+            },
+            {
+              "id": "go",
+              "component": "Button",
+              "children": "Go"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "result": {
+    "repaired": true,
+    "warnings": [
+      "Attached 2 orphan component(s) to root: name, go."
+    ],
+    "errors": []
+  }
+}

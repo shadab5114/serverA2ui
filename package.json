@@ -1,31 +1,16 @@
 {
-  "name": "a2ui-llm-server",
+  "name": "a2ui-genui-playground",
   "version": "1.0.0",
-  "description": "Server that takes a user prompt and generates A2UI JSON via an LLM (OpenAI now, Anthropic later). Fetches the component catalog at runtime from an MCP server.",
+  "description": "GenUI playground: a Python backend (server/: FastAPI + LangGraph + AG-UI) generates A2UI v0.9 grounded in @shadab5114/pds-core, rendered by the React client in client/.",
   "type": "module",
-  "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
-    "agui": "node agui/server.js",
-    "agui:dev": "node --watch agui/server.js",
+    "agui": "cd server && uv run python run.py",
+    "test": "cd server && uv run pytest",
+    "docs:genui": "node scripts/build-genui-page.mjs",
     "db:up": "docker compose up -d",
-    "db:down": "docker compose down",
-    "test": "node --test test/"
+    "db:down": "docker compose down"
   },
   "dependencies": {
-    "@ag-ui/core": "^0.0.57",
-    "@ag-ui/encoder": "^0.0.57",
-    "@langchain/core": "^1.2.3",
-    "@langchain/langgraph": "^1.4.8",
-    "@langchain/langgraph-checkpoint-postgres": "^1.0.4",
-    "@langchain/openai": "^1.5.5",
-    "@modelcontextprotocol/sdk": "^1.12.0",
-    "@shadab5114/pds-core": "^1.0.0-alpha.8",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.2",
-    "fastify": "^5.10.0",
-    "openai": "^4.77.0",
-    "pg": "^8.22.0"
+    "@shadab5114/pds-core": "^1.0.0-alpha.8"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "assistant": {
+    "description": "Helps a customer: answers, shows curated screens, builds new UI when nothing curated fits.",
+    "strategies": ["TEXT", "TEMPLATE", "GENERATE", "REFINE"],
+    "variants": 1,
+    "onGuidelineConflict": "repair",
+    "showRationale": false
+  },
+  "explorer": {
+    "description": "Helps a designer explore: starts from curated screens and proposes variants.",
+    "strategies": ["TEXT", "TEMPLATE", "ADAPT", "GENERATE", "REFINE"],
+    "variants": 3,
+    "onGuidelineConflict": "flag",
+    "showRationale": true
+  }
+}

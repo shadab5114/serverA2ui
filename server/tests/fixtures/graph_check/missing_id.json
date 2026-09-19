@@ -1,0 +1,90 @@
+{
+  "input": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "a"
+              ]
+            },
+            {
+              "id": "a",
+              "component": "Button",
+              "children": "A"
+            },
+            {
+              "component": "Button",
+              "children": "no id"
+            },
+            {
+              "id": 7,
+              "component": "Text",
+              "children": "numeric id"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "output": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "a"
+              ]
+            },
+            {
+              "id": "a",
+              "component": "Button",
+              "children": "A"
+            },
+            {
+              "component": "Button",
+              "children": "no id"
+            },
+            {
+              "id": 7,
+              "component": "Text",
+              "children": "numeric id"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "result": {
+    "repaired": false,
+    "warnings": [],
+    "errors": [
+      "A component is missing a string \"id\": {\"component\":\"Button\",\"children\":\"no id\"}.",
+      "A component is missing a string \"id\": {\"id\":7,\"component\":\"Text\",\"children\":\"numeric id\"}."
+    ]
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "input": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "List",
+              "children": {
+                "path": "/items",
+                "componentId": "row"
+              }
+            },
+            {
+              "id": "row",
+              "component": "Text",
+              "children": {
+                "path": "name"
+              }
+            },
+            {
+              "id": "stray",
+              "component": "Button",
+              "children": "Stray"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "output": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "List",
+              "children": {
+                "path": "/items",
+                "componentId": "row"
+              }
+            },
+            {
+              "id": "row",
+              "component": "Text",
+              "children": {
+                "path": "name"
+              }
+            },
+            {
+              "id": "stray",
+              "component": "Button",
+              "children": "Stray"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "result": {
+    "repaired": false,
+    "warnings": [
+      "Orphan components not attached (root uses a list template): stray."
+    ],
+    "errors": []
+  }
+}

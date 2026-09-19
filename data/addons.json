@@ -1,0 +1,47 @@
+{
+  "_note": "ILLUSTRATIVE mock data for the GenUI playground. Invented add-ons and prices; not a real carrier's offers.",
+  "addons": [
+    {
+      "id": "intl-pass",
+      "name": "International day pass",
+      "description": "Use your plan abroad in 200+ countries",
+      "priceLabel": "$10/day",
+      "availableFor": ["starter-5", "everyday-20", "unlimited-go"]
+    },
+    {
+      "id": "hotspot-boost",
+      "name": "Hotspot boost",
+      "description": "Adds 25 GB of hotspot data",
+      "priceLabel": "$10/mo",
+      "availableFor": ["everyday-20", "unlimited-go", "unlimited-plus"]
+    },
+    {
+      "id": "device-protect",
+      "name": "Device protection",
+      "description": "Repairs, replacements and theft cover",
+      "priceLabel": "$15/mo",
+      "availableFor": "all"
+    },
+    {
+      "id": "cloud-200",
+      "name": "Cloud storage 200 GB",
+      "description": "Automatic photo and contact backup",
+      "priceLabel": "$3/mo",
+      "availableFor": "all"
+    },
+    {
+      "id": "stream-bundle",
+      "name": "Streaming bundle",
+      "description": "Two ad-free video services",
+      "priceLabel": "$12/mo",
+      "availableFor": ["unlimited-go", "unlimited-plus"]
+    },
+    {
+      "id": "smartwatch-line",
+      "name": "Smartwatch line",
+      "description": "Calls and data on your watch",
+      "priceLabel": "$5/mo",
+      "availableFor": ["everyday-20", "unlimited-go", "unlimited-plus", "unlimited-max"]
+    }
+  ]
+}

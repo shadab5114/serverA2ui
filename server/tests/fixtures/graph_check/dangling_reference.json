@@ -1,0 +1,86 @@
+{
+  "input": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "a",
+                "ghost"
+              ]
+            },
+            {
+              "id": "a",
+              "component": "Button",
+              "children": "A"
+            },
+            {
+              "id": "modal",
+              "component": "Modal",
+              "child": "nowhere"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "output": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "a",
+                "modal"
+              ]
+            },
+            {
+              "id": "a",
+              "component": "Button",
+              "children": "A"
+            },
+            {
+              "id": "modal",
+              "component": "Modal",
+              "child": "nowhere"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "result": {
+    "repaired": true,
+    "warnings": [
+      "Attached 1 orphan component(s) to root: modal."
+    ],
+    "errors": [
+      "Component \"root\" references missing child id \"ghost\".",
+      "Component \"modal\" references missing child id \"nowhere\"."
+    ]
+  }
+}

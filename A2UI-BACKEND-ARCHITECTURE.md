@@ -1,5 +1,7 @@
 # Conversational App Backend — Architecture & Execution Plan
 
+> **Superseded for the backend stack (2026-09-19).** The backend is now Python (FastAPI + LangGraph + ag-ui-protocol) under `server/`; see [PYTHON-BACKEND-PLAN.md](PYTHON-BACKEND-PLAN.md). The Node implementation described here was deleted in P4 and remains in git history. Keep this document for its concepts (catalog as single source of truth, validator gate, repair loop).
+
 **Stack:** TypeScript (Bun) · LangGraph · A2UI · AG-UI · Fastify · Postgres · Redis
 **Context:** Building inside the existing repo, which already contains a basic A2UI setup and `catalog.json`.
 

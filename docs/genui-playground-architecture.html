@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="System architecture and two-persona user flows for a design-system-grounded generative UI playground.">
+<title>Agentic GenUI Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+    html { color-scheme: light dark; }
+    body { margin: 0; }
+    img { max-width: 100%; }
+    [hidden] { display: none !important; }
+    *, *::before, *::after { box-sizing: border-box; }
+    :where(a):focus-visible, :where(button):focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+</style>
+</head>
+<body>
+<!-- Source of truth for the GenUI playground architecture page.
+     Edit THIS file. Then run:  npm run docs:genui
+     -> regenerates docs/genui-playground-architecture.html (standalone, shareable). -->
+<style>
+  :root{
+    --sans:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+    --disp:"Archivo","IBM Plex Sans",system-ui,sans-serif;
+    --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+
+    --ground:#F2F4F3;
+    --surface:#FFFFFF;
+    --sunk:#E8ECEB;
+    --ink:#16211F;
+    --ink-2:#5A6866;
+    --ink-3:#8A9997;
+    --line:#D3DBD9;
+    --line-2:#BFCAC8;
+    --accent:#0B7A73;
+    --accent-deep:#07564F;
+    --accent-soft:#DDEDEB;
+    --warn:#A65228;
+    --warn-soft:#F5E6DC;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E1413;
+      --surface:#161E1D;
+      --sunk:#101817;
+      --ink:#E6EDEB;
+      --ink-2:#93A3A0;
+      --ink-3:#6C7C79;
+      --line:#293533;
+      --line-2:#364543;
+      --accent:#43C3B5;
+      --accent-deep:#7FDDD1;
+      --accent-soft:#15302D;
+      --warn:#DE9163;
+      --warn-soft:#2E211A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1413;
+    --surface:#161E1D;
+    --sunk:#101817;
+    --ink:#E6EDEB;
+    --ink-2:#93A3A0;
+    --ink-3:#6C7C79;
+    --line:#293533;
+    --line-2:#364543;
+    --accent:#43C3B5;
+    --accent-deep:#7FDDD1;
+    --accent-soft:#15302D;
+    --warn:#DE9163;
+    --warn-soft:#2E211A;
+  }
+
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1140px;margin:0 auto;padding-inline:24px;padding-block:56px 80px;}
+  @media (max-width:480px){.wrap{padding-inline:16px;padding-block:36px 56px;}}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 14px;}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,6vw,54px);line-height:1.02;letter-spacing:-.025em;margin:0 0 18px;text-wrap:balance;}
+  .lede{font-size:17px;color:var(--ink-2);max-width:62ch;margin:0 0 26px;}
+  .lede strong{color:var(--ink);font-weight:600;}
+
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none;}
+  .meta li{font-family:var(--mono);font-size:11px;color:var(--ink-2);border:1px solid var(--line);border-radius:3px;padding:4px 9px;background:var(--surface);}
+
+  .rule{height:1px;background:var(--line);border:0;margin:48px 0;}
+
+  h2{font-family:var(--disp);font-weight:700;font-size:26px;letter-spacing:-.015em;margin:0 0 8px;text-wrap:balance;}
+  h3{font-family:var(--disp);font-weight:600;font-size:19px;letter-spacing:-.01em;margin:0 0 4px;text-wrap:balance;}
+  .sec-no{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:10px;}
+  .sec-intro{color:var(--ink-2);max-width:66ch;margin:0 0 28px;}
+  .sec-intro b{color:var(--ink);font-weight:600;}
+
+  figure{margin:0;}
+  .scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px 18px;}
+  .dgm{display:block;width:100%;min-width:700px;height:auto;color:var(--ink);}
+  figcaption{font-size:13.5px;color:var(--ink-2);max-width:74ch;margin-top:14px;}
+  figcaption b{color:var(--ink);font-weight:600;}
+  figcaption em{font-style:italic;}
+
+  .dgm text{font-family:var(--mono);font-size:11px;fill:var(--ink);}
+  .dgm .band{fill:var(--sunk);stroke:var(--line-2);stroke-width:1;}
+  .dgm .box{fill:var(--surface);stroke:var(--line-2);stroke-width:1;}
+  .dgm .chip{fill:var(--surface);stroke:var(--line-2);stroke-width:1;}
+  .dgm .t-title{font-family:var(--sans);font-weight:600;font-size:13px;fill:var(--ink);}
+  .dgm .t-sub{font-size:10px;fill:var(--ink-2);}
+  .dgm .t-band{font-size:10.5px;letter-spacing:.11em;fill:var(--ink-3);}
+  .dgm .t-edge{font-size:10px;fill:var(--ink-2);}
+  .dgm .t-chip{font-size:10px;fill:var(--ink-2);}
+  .dgm .flow{stroke:var(--ink-3);stroke-width:1.4;fill:none;}
+  .dgm .ar-n{fill:var(--ink-3);}
+  .dgm .acc-band{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.2;}
+  .dgm .acc-box{fill:var(--surface);stroke:var(--accent);stroke-width:1.2;}
+  .dgm .acc-t{fill:var(--accent-deep);}
+  .dgm .acc-flow{stroke:var(--accent);stroke-width:1.6;fill:none;}
+  .dgm .ar-a{fill:var(--accent);}
+  .dgm .acc-chip{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1;}
+
+  /* ---- decision section ---- */
+  ol.pipe{list-style:none;margin:0 0 30px;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;}
+  @media (max-width:900px){ol.pipe{grid-template-columns:repeat(3,minmax(0,1fr));}}
+  @media (max-width:520px){ol.pipe{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  ol.pipe li{background:var(--surface);border:1px solid var(--line-2);border-radius:5px;padding:12px 13px;position:relative;}
+  ol.pipe li.ds{border-color:var(--accent);background:var(--accent-soft);}
+  ol.pipe .step{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);font-weight:500;display:block;margin-bottom:4px;}
+  ol.pipe li.ds .step{color:var(--accent-deep);}
+  ol.pipe p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.45;}
+
+  .tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;margin-bottom:30px;}
+  table{border-collapse:collapse;width:100%;min-width:640px;font-size:13.5px;}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:0;}
+  th{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:var(--ink-3);background:var(--sunk);}
+  td{color:var(--ink-2);}
+  td.s{font-family:var(--mono);font-size:12.5px;color:var(--ink);white-space:nowrap;}
+  td.y,td.n{font-family:var(--mono);text-align:center;width:92px;}
+  td.y{color:var(--accent-deep);font-weight:500;}
+  td.n{color:var(--ink-3);}
+
+  .principles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+  @media (max-width:820px){.principles{grid-template-columns:1fr;}}
+  .principles div{border-top:2px solid var(--accent);padding-top:10px;}
+  .principles h4{font-family:var(--disp);font-weight:600;font-size:16px;margin:0 0 6px;text-wrap:balance;}
+  .principles p{margin:0;font-size:13.5px;color:var(--ink-2);}
+
+  /* ---- step rails ---- */
+  .lanes{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+  @media (max-width:900px){.lanes{grid-template-columns:1fr;gap:46px;}}
+
+  .lane-head{border-top:2px solid var(--accent);padding-top:12px;margin-bottom:24px;}
+  .lane-head p{margin:0;}
+  .lane-head .who{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;}
+  .lane-head .note{font-size:13.5px;color:var(--ink-2);margin-top:4px;}
+
+  ol.steps{list-style:none;margin:0;padding:0;}
+  li.step{position:relative;padding-left:40px;padding-bottom:28px;}
+  li.step:last-child{padding-bottom:0;}
+  li.step::before{content:"";position:absolute;left:11px;top:26px;bottom:0;width:1px;background:var(--line-2);}
+  li.step:last-child::before{display:none;}
+  .node{position:absolute;left:0;top:1px;width:23px;height:23px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);font-family:var(--mono);font-size:11px;display:grid;place-items:center;}
+  li.step.agent .node{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-deep);}
+
+  .actor{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0;}
+  .said{margin:2px 0 10px;font-size:15.5px;font-weight:500;color:var(--ink);text-wrap:balance;}
+  .said em{font-style:normal;color:var(--ink-2);font-weight:400;}
+
+  ul.does{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;}
+  ul.does li{position:relative;padding-left:15px;font-size:13.5px;color:var(--ink-2);}
+  ul.does li::before{content:"";position:absolute;left:0;top:10px;width:6px;height:1px;background:var(--line-2);}
+  ul.does li b{color:var(--ink);font-weight:500;}
+  code{font-family:var(--mono);font-size:12px;background:var(--sunk);border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink);}
+
+  .emits{margin-top:11px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+  .emits .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);}
+  .ev{font-family:var(--mono);font-size:11.5px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent-deep);border-radius:3px;padding:2px 7px;}
+
+  .mode{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-radius:3px;padding:2px 8px;display:inline-block;}
+  .m-pin{border:1px solid var(--line-2);color:var(--ink-2);background:transparent;}
+  .m-com{border:1px solid var(--accent);color:var(--accent-deep);background:var(--accent-soft);}
+  .m-gen{border:1px solid var(--accent);color:#FFFFFF;background:var(--accent);}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .m-gen{color:#0E1413;}}
+  :root[data-theme="dark"] .m-gen{color:#0E1413;}
+
+  .dial{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin-bottom:30px;}
+  .dial p{margin:0 0 12px;font-size:13.5px;color:var(--ink-2);}
+  .dial-row{display:flex;flex-wrap:wrap;gap:10px 26px;}
+  .dial-row div{font-size:13px;color:var(--ink-2);}
+  .dial-row div span{display:block;margin-bottom:4px;}
+  .dial-row code{font-size:11px;}
+
+  .flag{margin-top:11px;border-left:2px solid var(--warn);background:var(--warn-soft);padding:10px 13px;border-radius:0 4px 4px 0;font-size:13.5px;color:var(--ink);}
+  .flag .fcode{font-family:var(--mono);font-size:10.5px;color:var(--warn);letter-spacing:.08em;display:block;margin-bottom:3px;text-transform:uppercase;}
+
+  .closer{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:24px 26px;margin-top:48px;}
+  .closer h3{margin-bottom:10px;}
+  .closer p{margin:0;color:var(--ink-2);max-width:72ch;}
+  .closer p + p{margin-top:12px;}
+  .closer b{color:var(--ink);font-weight:600;}
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">System design · design-system-grounded generative UI</p>
+  <h1>Agentic GenUI Playground</h1>
+  <p class="lede">A showcase, not an app. It exists to demonstrate one claim: an agent can compose UI freely, and <strong>the design system is what makes that composition safe, on-brand and repeatable</strong> rather than a novelty.</p>
+  <ul class="meta">
+    <li>LangGraph</li><li>AG-UI / SSE</li><li>A2UI v0.9</li><li>Curated templates</li><li>Schema + guideline gates</li><li>MCP + RAG</li><li>Postgres checkpointer</li><li>React + PDS</li>
+  </ul>
+
+  <hr class="rule">
+
+  <span class="sec-no">01 — Overall architecture</span>
+  <h2>Four layers and one turn</h2>
+  <p class="sec-intro">Each layer answers a different question: what the user sees, how it travels, who decides, and what constrains the decision. State cuts across all four. If a new feature doesn&rsquo;t sit in exactly one layer, it isn&rsquo;t scoped yet.</p>
+
+  <figure>
+    <div class="scroll">
+      <svg class="dgm" viewBox="0 0 1100 620" role="img" aria-label="Layered architecture: the client sends a prompt or user action over AG-UI to one LangGraph agent. The agent decides whether to reuse a curated template or create new UI, applies the persona's policy, grounds itself in the design system through MCP and RAG when it creates, builds, and verifies the result against catalog schemas and design guidelines before streaming it back. A Postgres checkpointer holds thread, persona and surface state.">
+        <defs>
+          <marker id="arN" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ar-n"/></marker>
+          <marker id="arA" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ar-a"/></marker>
+        </defs>
+
+        <rect class="band" x="40" y="40" width="620" height="110" rx="5"/>
+        <text class="t-band" x="56" y="62">1 · CLIENT — CONVERSATIONAL PANE</text>
+        <rect class="box" x="56" y="78" width="185" height="54" rx="4"/>
+        <text class="t-title" x="66" y="101">Chat</text>
+        <text class="t-sub" x="66" y="119">prompt · reply · persona</text>
+        <rect class="box" x="257" y="78" width="185" height="54" rx="4"/>
+        <text class="t-title" x="267" y="101">Variant gallery</text>
+        <text class="t-sub" x="267" y="119">baseline + variants</text>
+        <rect class="box" x="458" y="78" width="185" height="54" rx="4"/>
+        <text class="t-title" x="468" y="101">Trace + rationale</text>
+        <text class="t-sub" x="468" y="119">decisions · sources</text>
+
+        <rect class="band" x="40" y="180" width="620" height="90" rx="5"/>
+        <text class="t-band" x="56" y="202">2 · PROTOCOL — AG-UI OVER SSE</text>
+        <rect class="chip" x="56" y="216" width="106" height="30" rx="3"/>
+        <text class="t-chip" x="66" y="235">TEXT_MESSAGE_*</text>
+        <rect class="acc-chip" x="172" y="216" width="90" height="30" rx="3"/>
+        <text class="acc-t" x="182" y="235" font-size="10">TOOL_CALL_*</text>
+        <rect class="acc-chip" x="272" y="216" width="50" height="30" rx="3"/>
+        <text class="acc-t" x="282" y="235" font-size="10">a2ui</text>
+        <rect class="acc-chip" x="332" y="216" width="86" height="30" rx="3"/>
+        <text class="acc-t" x="342" y="235" font-size="10">a2ui_patch</text>
+        <rect class="chip" x="428" y="216" width="94" height="30" rx="3"/>
+        <text class="t-chip" x="438" y="235">STATE_DELTA</text>
+        <text class="t-edge" x="644" y="235" text-anchor="end">one fixed vocabulary</text>
+
+        <rect class="band" x="40" y="300" width="620" height="170" rx="5"/>
+        <text class="t-band" x="56" y="322">3 · AGENT — ONE GRAPH, PERSONA = POLICY</text>
+
+        <rect class="box" x="56" y="336" width="104" height="54" rx="4"/>
+        <text class="t-title" x="66" y="358">Decide</text>
+        <text class="t-sub" x="66" y="376">reuse or new?</text>
+        <rect class="box" x="177" y="336" width="104" height="54" rx="4"/>
+        <text class="t-title" x="187" y="358">Policy</text>
+        <text class="t-sub" x="187" y="376">persona rules</text>
+        <rect class="acc-box" x="298" y="336" width="104" height="54" rx="4"/>
+        <text class="t-title" x="308" y="358">Ground</text>
+        <text class="t-sub" x="308" y="376">design brief</text>
+        <rect class="box" x="419" y="336" width="104" height="54" rx="4"/>
+        <text class="t-title" x="429" y="358">Build</text>
+        <text class="t-sub" x="429" y="376">fill/patch/new</text>
+        <rect class="acc-box" x="540" y="336" width="104" height="54" rx="4"/>
+        <text class="t-title" x="550" y="358">Verify</text>
+        <text class="t-sub" x="550" y="376">schema + rules</text>
+
+        <line class="flow" x1="160" y1="363" x2="174" y2="363" marker-end="url(#arN)"/>
+        <line class="flow" x1="281" y1="363" x2="295" y2="363" marker-end="url(#arN)"/>
+        <line class="flow" x1="402" y1="363" x2="416" y2="363" marker-end="url(#arN)"/>
+        <line class="flow" x1="523" y1="363" x2="537" y2="363" marker-end="url(#arN)"/>
+        <path class="acc-flow" d="M592 390 V402 H471 V394" marker-end="url(#arA)"/>
+        <text class="t-edge" x="531" y="414" text-anchor="middle">repair</text>
+
+        <rect class="chip" x="56" y="422" width="284" height="32" rx="3"/>
+        <text class="t-chip" x="68" y="442">assistant → TEXT · TEMPLATE · GENERATE</text>
+        <rect class="acc-chip" x="356" y="422" width="288" height="32" rx="3"/>
+        <text class="acc-t" x="368" y="442" font-size="10">explorer → + ADAPT · REFINE · 3 variants</text>
+
+        <rect class="band" x="40" y="500" width="620" height="80" rx="5"/>
+        <text class="t-band" x="56" y="522">STATE — CROSS-CUTTING</text>
+        <rect class="chip" x="56" y="534" width="74" height="30" rx="3"/>
+        <text class="t-chip" x="66" y="553">messages</text>
+        <rect class="chip" x="140" y="534" width="132" height="30" rx="3"/>
+        <text class="t-chip" x="150" y="553">persona · selection</text>
+        <rect class="chip" x="282" y="534" width="176" height="30" rx="3"/>
+        <text class="t-chip" x="292" y="553">surfaces { base + patches }</text>
+        <text class="t-edge" x="644" y="553" text-anchor="end">Postgres, keyed by threadId</text>
+
+        <rect class="acc-band" x="800" y="300" width="260" height="220" rx="5"/>
+        <text class="acc-t" x="814" y="320" font-size="10.5" letter-spacing=".11em">4 · GROUNDING</text>
+        <text class="t-sub" x="814" y="336">your design system</text>
+        <rect class="acc-box" x="814" y="346" width="232" height="36" rx="4"/>
+        <text class="t-title" x="824" y="369" font-size="12">catalog.json</text>
+        <text class="acc-t" x="1036" y="369" font-size="10" text-anchor="end">PUSH</text>
+        <rect class="acc-box" x="814" y="388" width="232" height="36" rx="4"/>
+        <text class="t-title" x="824" y="411" font-size="12">templates/</text>
+        <text class="acc-t" x="1036" y="411" font-size="10" text-anchor="end">CURATED</text>
+        <rect class="acc-box" x="814" y="430" width="232" height="36" rx="4"/>
+        <text class="t-title" x="824" y="453" font-size="12">MCP servers</text>
+        <text class="acc-t" x="1036" y="453" font-size="10" text-anchor="end">PULL</text>
+        <rect class="acc-box" x="814" y="472" width="232" height="36" rx="4"/>
+        <text class="t-title" x="824" y="495" font-size="12">RAG endpoint</text>
+        <text class="acc-t" x="1036" y="495" font-size="10" text-anchor="end">PULL</text>
+
+        <line class="acc-flow" x1="662" y1="362" x2="796" y2="362" marker-end="url(#arA)"/>
+        <text class="t-edge" x="729" y="354" text-anchor="middle">query</text>
+        <line class="acc-flow" x1="798" y1="422" x2="664" y2="422" marker-end="url(#arA)"/>
+        <text class="t-edge" x="731" y="414" text-anchor="middle">answer + sources</text>
+
+        <line class="flow" x1="120" y1="150" x2="120" y2="176" marker-end="url(#arN)"/>
+        <text class="t-edge" x="130" y="169">prompt · userAction · refine</text>
+        <line class="flow" x1="120" y1="270" x2="120" y2="296" marker-end="url(#arN)"/>
+        <text class="t-edge" x="130" y="289">RunAgentInput + persona</text>
+        <line class="flow" x1="580" y1="298" x2="580" y2="274" marker-end="url(#arN)"/>
+        <text class="t-edge" x="570" y="289" text-anchor="end">verified A2UI + events</text>
+        <line class="flow" x1="580" y1="178" x2="580" y2="154" marker-end="url(#arN)"/>
+        <text class="t-edge" x="570" y="169" text-anchor="end">render</text>
+        <line class="flow" x1="350" y1="472" x2="350" y2="498" marker-start="url(#arN)" marker-end="url(#arN)"/>
+        <text class="t-edge" x="360" y="489">read · write</text>
+      </svg>
+    </div>
+    <figcaption><b>One turn, end to end.</b> The request goes down the stack and the result comes back up. The agent first decides whether a <em>curated template</em> already covers the request. It only pulls guidance from MCP and RAG when it has to create something. Nothing reaches the wire until verification passes.</figcaption>
+  </figure>
+
+  <hr class="rule">
+
+  <span class="sec-no">02 — Where your team&rsquo;s work lands</span>
+  <h2>One catalog, three jobs</h2>
+  <p class="sec-intro">This is the impact argument in one picture. The artifact your team already maintains feeds three different parts of the system. A component change reaches all three at once, instead of being re-implemented three times.</p>
+
+  <figure>
+    <div class="scroll">
+      <svg class="dgm" viewBox="0 0 900 290" role="img" aria-label="catalog.json branches three ways: injected into the agent prompt as its component vocabulary, compiled into schemas for the validator gate, and bound to PDS components in the renderer.">
+        <defs>
+          <marker id="arB" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ar-a"/></marker>
+        </defs>
+        <rect class="acc-band" x="40" y="106" width="190" height="64" rx="5"/>
+        <text class="acc-t" x="58" y="136" font-size="14">catalog.json</text>
+        <text class="t-sub" x="58" y="155">single source of truth</text>
+
+        <path class="acc-flow" d="M230 138 H360"/>
+        <path class="acc-flow" d="M360 62 V228"/>
+        <path class="acc-flow" d="M360 62 H494" marker-end="url(#arB)"/>
+        <path class="acc-flow" d="M360 138 H494" marker-end="url(#arB)"/>
+        <path class="acc-flow" d="M360 228 H494" marker-end="url(#arB)"/>
+        <text class="t-edge" x="428" y="54" text-anchor="middle">injected</text>
+        <text class="t-edge" x="428" y="130" text-anchor="middle">compiled</text>
+        <text class="t-edge" x="428" y="220" text-anchor="middle">bound</text>
+
+        <rect class="box" x="500" y="34" width="360" height="56" rx="4"/>
+        <text class="t-title" x="518" y="59">Prompt vocabulary</text>
+        <text class="t-sub" x="518" y="78">what the agent is allowed to name</text>
+        <rect class="box" x="500" y="110" width="360" height="56" rx="4"/>
+        <text class="t-title" x="518" y="135">Validator gate</text>
+        <text class="t-sub" x="518" y="154">what reaches the wire, templates included</text>
+        <rect class="box" x="500" y="200" width="360" height="56" rx="4"/>
+        <text class="t-title" x="518" y="225">Renderer map</text>
+        <text class="t-sub" x="518" y="244">A2UI node → PDS component + tokens</text>
+      </svg>
+    </div>
+    <figcaption><b>Change a component once; the agent&rsquo;s vocabulary, the safety gate and the rendered pixels all move together.</b> Curated templates are checked by the same gate in CI, so a catalog change that breaks a template breaks the build, not the demo. Guidelines and rationale don&rsquo;t travel this path. They&rsquo;re too large and open-ended to inject, which is why MCP and RAG exist as a separate layer the agent can query.</figcaption>
+  </figure>
+
+  <hr class="rule">
+
+  <span class="sec-no">03 — How the backend decides</span>
+  <h2>Reuse or create, and stay grounded either way</h2>
+  <p class="sec-intro">For every prompt and persona, the backend decides whether a <b>curated template</b> covers the request or whether it has to <b>create new UI from the catalog</b>. When it creates, it is creative in a place where it can be checked. <b>The LLM proposes; the policy decides.</b></p>
+
+  <ol class="pipe" aria-label="Decision pipeline">
+    <li><span class="step">Decide</span><p>What&rsquo;s needed, and does a template cover it? Returns a strategy, gaps and a reason.</p></li>
+    <li><span class="step">Policy</span><p>Is this persona allowed that strategy? Plain code, not a prompt. Falls back if not.</p></li>
+    <li class="ds"><span class="step">Ground</span><p>Only when creating: RAG and MCP turn the gaps into a cited design brief.</p></li>
+    <li><span class="step">Build</span><p>Fill a template, patch it, or compose from the catalog, following the brief.</p></li>
+    <li class="ds"><span class="step">Verify</span><p>Schema gate plus guideline gate. Repair, or ask the designer.</p></li>
+    <li><span class="step">Respond</span><p>UI, plus the reason and sources for the trace panel.</p></li>
+  </ol>
+
+  <div class="tbl">
+    <table>
+      <thead>
+        <tr><th>Strategy</th><th>What the backend does</th><th>Dial</th><th>Assistant</th><th>Explorer</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="s">TEXT</td><td>Answers in prose, streamed</td><td>none</td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><td class="s">TEMPLATE</td><td>Picks a curated template and fills <b>data only</b> from providers</td><td><span class="mode m-pin">Pinned</span></td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><td class="s">ADAPT</td><td>Patches a curated template to close the request&rsquo;s gaps, as N variants</td><td><span class="mode m-com">Composed</span></td><td class="n">no</td><td class="y">yes</td></tr>
+        <tr><td class="s">GENERATE</td><td>Composes new UI from the catalog, grounded in guidelines and patterns</td><td><span class="mode m-gen">Generated</span></td><td class="y">yes</td><td class="y">yes</td></tr>
+        <tr><td class="s">REFINE</td><td>Patches a surface already on screen</td><td><span class="mode m-com">Composed</span></td><td class="n">no</td><td class="y">yes</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="principles">
+    <div>
+      <h4>One graph, persona as policy</h4>
+      <p>Both personas run the same pipeline. <code>personas.json</code> decides what each may do, so curated customer flows can&rsquo;t be rearranged by a prompt.</p>
+    </div>
+    <div>
+      <h4>Creative in the brief, faithful in the build</h4>
+      <p>Divergent thinking happens in the cited brief. The build follows it, and the guideline gate is what makes creative output safe to show.</p>
+    </div>
+    <div>
+      <h4>Data never comes from the LLM</h4>
+      <p>Prices and features come from data providers. If a request needs a field that doesn&rsquo;t exist, the agent says so instead of inventing it.</p>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <span class="sec-no">04 — User flow</span>
+  <h2>Two personas, one template library</h2>
+  <p class="sec-intro">The customer and the designer start from the <b>same curated templates</b>. The customer gets them exactly as designed. The designer can explore changes on top of them, grounded in your guidelines and checked by the same gates.</p>
+
+  <div class="dial">
+    <p>Both flows move along one dial: how much the agent decides.</p>
+    <div class="dial-row">
+      <div><span class="mode m-pin">Pinned</span><code>TEMPLATE</code>: curated layout, live data</div>
+      <div><span class="mode m-com">Composed</span><code>ADAPT</code> · <code>REFINE</code>: patches on a curated template</div>
+      <div><span class="mode m-gen">Generated</span><code>GENERATE</code>: new UI from the catalog</div>
+    </div>
+  </div>
+
+  <div class="lanes">
+
+    <div>
+      <div class="lane-head">
+        <p class="who">Persona A — Customer</p>
+        <h3>Choosing a plan</h3>
+        <p class="note">Policy: TEXT · TEMPLATE · GENERATE. Curated flows stay exactly as designed.</p>
+      </div>
+      <ol class="steps">
+
+        <li class="step">
+          <div class="node">1</div>
+          <p class="actor">User</p>
+          <p class="said">&ldquo;Show me the plans&rdquo;</p>
+          <ul class="does">
+            <li>Decide: <b>TEMPLATE</b> <code>plan-tiles</code> (full match)</li>
+            <li><span class="mode m-pin">Pinned</span>: layout identical every time</li>
+            <li>Plan data comes from the <b>plans provider</b>, never the LLM</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">a2ui</span></div>
+        </li>
+
+        <li class="step">
+          <div class="node">2</div>
+          <p class="actor">User</p>
+          <p class="said">Taps <em>Choose Unlimited Plus</em></p>
+          <ul class="does">
+            <li>Client returns a <code>userAction</code>: <code>select_plan</code></li>
+            <li><code>selectedPlan</code> is written to the checkpoint</li>
+            <li>The agent picks the next step, using the template&rsquo;s <code>suggestedNext</code> as a hint</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">STATE_DELTA</span></div>
+        </li>
+
+        <li class="step agent">
+          <div class="node">3</div>
+          <p class="actor">Agent</p>
+          <p class="said">&ldquo;Here&rsquo;s what you can add&rdquo;</p>
+          <ul class="does">
+            <li>Decide: <b>TEMPLATE</b> <code>plan-addons</code></li>
+            <li>Provider params come from state: add-ons valid for <b>this</b> plan</li>
+            <li><span class="mode m-pin">Pinned</span></li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">a2ui</span></div>
+        </li>
+
+        <li class="step">
+          <div class="node">4</div>
+          <p class="actor">User</p>
+          <p class="said">&ldquo;I travel a lot &mdash; what matters?&rdquo;</p>
+          <ul class="does">
+            <li>No template covers this, so <b>GENERATE</b> <span class="mode m-gen">Generated</span></li>
+            <li>Ground: <b>RAG</b> on presenting comparisons, <b>MCP</b> for the approved pattern &rarr; a cited brief</li>
+            <li>Verify: schema gate + guideline gate, repaired silently if needed</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">TOOL_CALL_*</span><span class="ev">a2ui</span></div>
+        </li>
+      </ol>
+    </div>
+
+    <div>
+      <div class="lane-head">
+        <p class="who">Persona B — Internal designer</p>
+        <h3>Exploring the plan tile</h3>
+        <p class="note">Policy: adds ADAPT · REFINE, 3 variants, asks on guideline conflicts. Starts from production.</p>
+      </div>
+      <ol class="steps">
+
+        <li class="step">
+          <div class="node">1</div>
+          <p class="actor">Designer</p>
+          <p class="said">&ldquo;Show me plan details&rdquo;</p>
+          <ul class="does">
+            <li>Decide: <b>TEMPLATE</b> <code>plan-tiles</code>, the <b>same</b> template the customer sees</li>
+            <li>Shown as <code>Baseline · plan-tiles@1</code></li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">a2ui</span></div>
+        </li>
+
+        <li class="step">
+          <div class="node">2</div>
+          <p class="actor">Designer</p>
+          <p class="said">&ldquo;Add network coverage info to the plan view&rdquo;</p>
+          <ul class="does">
+            <li>Decide: <b>ADAPT</b>, coverage <code>partial</code>, gap: <em>no coverage info</em></li>
+            <li>Ground: <b>RAG</b> and <b>MCP</b> turn the gap into a cited brief</li>
+            <li>Queries and sources stream into the trace panel</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">TOOL_CALL_*</span></div>
+        </li>
+
+        <li class="step agent">
+          <div class="node">3</div>
+          <p class="actor">Agent</p>
+          <p class="said">Three variants, each a patch on the baseline</p>
+          <ul class="does">
+            <li><span class="mode m-com">Composed</span>: unchanged parts stay identical to production</li>
+            <li>Each variant passes <b>both gates</b> and appears as soon as it does</li>
+            <li>If the provider has no coverage field, the agent says <em>&ldquo;needs data field <code>coverage</code>&rdquo;</em> instead of inventing numbers</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">a2ui ×3</span></div>
+        </li>
+
+        <li class="step">
+          <div class="node">4</div>
+          <p class="actor">Designer</p>
+          <p class="said">&ldquo;Add a badge on option 3, top right&rdquo;</p>
+          <ul class="does">
+            <li>Decide: <b>REFINE</b> <code>var-3</code>, resolved from what&rsquo;s on screen</li>
+            <li>One more patch on variant 3&rsquo;s chain; the others stay untouched</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">a2ui_patch</span></div>
+        </li>
+
+        <li class="step agent">
+          <div class="node">5</div>
+          <p class="actor">Agent</p>
+          <p class="said">The design system answers back</p>
+          <ul class="does">
+            <li>The guideline gate cites a rule. Explorer policy is <b>ask</b>, so the agent pauses for a decision</li>
+            <li>Designer takes the alternative or overrides &rarr; back to step 4</li>
+          </ul>
+          <div class="flag">
+            <span class="fcode">DS-207 · badge usage</span>
+            Badges are reserved for system status, not merchandising. Consider <code>Tag</code> instead.
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="closer">
+    <h3>What the audience should actually watch</h3>
+    <p>A demo where UI simply appears is indistinguishable from a designer with a good prompt. Point at the <b>trace panel</b> instead: the agent choosing your curated template over inventing one, explaining why, consulting your guidelines, and being corrected by your gates.</p>
+    <p>That&rsquo;s why the decision&rsquo;s reason is sent to the client, why <code>TOOL_CALL_*</code> is a first-class event rather than a debug log, and why every grounding tool returns <code>{ answer, sources[] }</code>. Making the grounding step visible is an architecture decision, not a UI one.</p>
+  </div>
+
+</div>
+
+</body>
+</html>

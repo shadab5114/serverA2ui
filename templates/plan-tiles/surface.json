@@ -1,0 +1,46 @@
+{
+  "a2ui": [
+    {
+      "version": "v0.9",
+      "createSurface": { "surfaceId": "main", "catalogId": "https://pdesign.dev/catalog/v1/catalog.json" }
+    },
+    {
+      "version": "v0.9",
+      "updateComponents": {
+        "surfaceId": "main",
+        "components": [
+          { "id": "root", "component": "Column", "align": "stretch", "children": ["heading", "summary", "plan-row", "fine-print"] },
+          { "id": "heading", "component": "Text", "kind": "title", "size": "large", "bold": true, "primitive": "h2", "children": "Choose your plan" },
+          { "id": "summary", "component": "Text", "kind": "body", "size": "medium", "children": { "path": "/summary" } },
+          { "id": "plan-row", "component": "Row", "align": "stretch", "children": { "path": "/plans", "componentId": "plan-tile" } },
+          {
+            "id": "plan-tile",
+            "component": "ComposableTileContainer",
+            "weight": 1,
+            "showBorder": true,
+            "height": "auto",
+            "cap": { "children": { "path": "badge" }, "backgroundColor": "black" },
+            "header": {
+              "title": { "children": { "path": "name" }, "size": "titleSmall", "bold": true },
+              "subtitle": { "children": { "path": "priceLabel" }, "size": "bodyLarge" }
+            },
+            "children": "plan-body"
+          },
+          { "id": "plan-body", "component": "Column", "align": "stretch", "children": ["plan-data", "plan-features", "plan-choose"] },
+          { "id": "plan-data", "component": "Text", "kind": "body", "size": "medium", "bold": true, "children": { "path": "dataLabel" } },
+          { "id": "plan-features", "component": "Column", "children": { "path": "features", "componentId": "plan-feature" } },
+          { "id": "plan-feature", "component": "Text", "kind": "body", "size": "small", "children": { "path": "text" } },
+          {
+            "id": "plan-choose",
+            "component": "Button",
+            "kind": "secondary",
+            "size": "small",
+            "children": "Choose",
+            "action": { "event": { "name": "select_plan", "context": { "planId": { "path": "id" }, "planName": { "path": "name" } } } }
+          },
+          { "id": "fine-print", "component": "Text", "kind": "body", "size": "xsmall", "children": "Illustrative plans and prices for this playground, not real offers." }
+        ]
+      }
+    }
+  ]
+}

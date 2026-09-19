@@ -1,0 +1,54 @@
+{
+  "name": "orders.list",
+  "description": "The customer's past and current orders, newest first, optionally filtered.",
+  "source": { "file": "orders.json", "list": "/orders" },
+  "sort": { "by": "placedOn", "order": "desc" },
+  "params": {
+    "status": {
+      "type": "string",
+      "description": "Only orders with this status.",
+      "filter": { "op": "eq", "field": "status" },
+      "choices": "data",
+      "label": "with status {value}"
+    },
+    "minTotal": {
+      "type": "number",
+      "description": "Only orders whose total is at least this many dollars.",
+      "filter": { "op": "gte", "field": "total" },
+      "label": "of ${value:g} or more"
+    },
+    "maxTotal": {
+      "type": "number",
+      "description": "Only orders whose total is at most this many dollars.",
+      "filter": { "op": "lte", "field": "total" },
+      "label": "up to ${value:g}"
+    },
+    "item": {
+      "type": "string",
+      "description": "Only orders containing a product whose name includes this text (e.g. a product type).",
+      "filter": { "op": "contains", "field": "items/*/name" },
+      "label": "containing \"{value}\""
+    },
+    "placedSince": {
+      "type": "string",
+      "description": "Only orders placed on or after this date, as YYYY-MM-DD.",
+      "filter": { "op": "gte", "field": "placedOn" },
+      "label": "placed since {value:date}"
+    },
+    "limit": {
+      "type": "number",
+      "description": "Show only this many of the most recent orders.",
+      "filter": { "op": "limit" }
+    }
+  },
+  "computed": {
+    "totalLabel": "${total:,.2f}",
+    "placedLabel": "Placed {placedOn:date}",
+    "items/*/label": "{quantity} × {name}"
+  },
+  "summary": {
+    "all": "All {total} orders, newest first.",
+    "filtered": "{count} of {total} orders {filters}.",
+    "empty": "No orders {filters}."
+  }
+}

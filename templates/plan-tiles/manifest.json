@@ -1,0 +1,27 @@
+{
+  "id": "plan-tiles",
+  "version": 1,
+  "title": "Plan tiles",
+  "intent": "Show the available mobile plans side by side, each with its price, data, key features and badge, optionally filtered by price or unlimited data",
+  "examples": [
+    "show me the plans",
+    "what plans do you have?",
+    "unlimited plans under $60",
+    "plans cheaper than $50",
+    "show me plan details"
+  ],
+  "personas": [
+    "assistant",
+    "explorer"
+  ],
+  "data": {
+    "provider": "plans.list"
+  },
+  "caption": "Here are the plans.",
+  "events": {
+    "select_plan": "The user chose a plan to continue with (context: planId, planName)."
+  },
+  "suggestedNext": [
+    "plan-addons"
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "input": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "path": "/",
+          "value": {
+            "shoes": [
+              {
+                "name": "A"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "title",
+                "list"
+              ]
+            },
+            {
+              "id": "title",
+              "component": "Text",
+              "children": "Shoes"
+            },
+            {
+              "id": "list",
+              "component": "List",
+              "children": {
+                "path": "/shoes",
+                "componentId": "shoe-tile"
+              }
+            },
+            {
+              "id": "shoe-tile",
+              "component": "Text",
+              "children": {
+                "path": "name"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "output": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateDataModel": {
+          "surfaceId": "main",
+          "path": "/",
+          "value": {
+            "shoes": [
+              {
+                "name": "A"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "title",
+                "list"
+              ]
+            },
+            {
+              "id": "title",
+              "component": "Text",
+              "children": "Shoes"
+            },
+            {
+              "id": "list",
+              "component": "List",
+              "children": {
+                "path": "/shoes",
+                "componentId": "shoe-tile"
+              }
+            },
+            {
+              "id": "shoe-tile",
+              "component": "Text",
+              "children": {
+                "path": "name"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "result": {
+    "repaired": false,
+    "warnings": [],
+    "errors": []
+  }
+}

@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="System architecture and two-persona user flows for a design-system-grounded generative UI playground.">
+<title>Agentic GenUI Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+    html { color-scheme: light dark; }
+    body { margin: 0; }
+    img { max-width: 100%; }
+    [hidden] { display: none !important; }
+    *, *::before, *::after { box-sizing: border-box; }
+    :where(a):focus-visible, :where(button):focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+</style>
+</head>
+<body>
+<!-- Source of truth for the GenUI playground architecture page.
+     Edit THIS file. Then run:  npm run docs:genui
+     -> regenerates docs/genui-playground-architecture.html (standalone, shareable). -->
+<style>
+  :root{
+    --sans:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+    --disp:"Archivo","IBM Plex Sans",system-ui,sans-serif;
+    --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+
+    --ground:#F2F4F3;
+    --surface:#FFFFFF;
+    --sunk:#E8ECEB;
+    --ink:#16211F;
+    --ink-2:#5A6866;
+    --ink-3:#8A9997;
+    --line:#D3DBD9;
+    --line-2:#BFCAC8;
+    --accent:#0B7A73;
+    --accent-deep:#07564F;
+    --accent-soft:#DDEDEB;
+    --warn:#A65228;
+    --warn-soft:#F5E6DC;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E1413;
+      --surface:#161E1D;
+      --sunk:#101817;
+      --ink:#E6EDEB;
+      --ink-2:#93A3A0;
+      --ink-3:#6C7C79;
+      --line:#293533;
+      --line-2:#364543;
+      --accent:#43C3B5;
+      --accent-deep:#7FDDD1;
+      --accent-soft:#15302D;
+      --warn:#DE9163;
+      --warn-soft:#2E211A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1413;
+    --surface:#161E1D;
+    --sunk:#101817;
+    --ink:#E6EDEB;
+    --ink-2:#93A3A0;
+    --ink-3:#6C7C79;
+    --line:#293533;
+    --line-2:#364543;
+    --accent:#43C3B5;
+    --accent-deep:#7FDDD1;
+    --accent-soft:#15302D;
+    --warn:#DE9163;
+    --warn-soft:#2E211A;
+  }
+
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1140px;margin:0 auto;padding-inline:24px;padding-block:56px 80px;}
+  @media (max-width:480px){.wrap{padding-inline:16px;padding-block:36px 56px;}}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 14px;}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,6vw,54px);line-height:1.02;letter-spacing:-.025em;margin:0 0 18px;text-wrap:balance;}
+  .lede{font-size:17px;color:var(--ink-2);max-width:62ch;margin:0 0 26px;}
+  .lede strong{color:var(--ink);font-weight:600;}
+
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none;}
+  .meta li{font-family:var(--mono);font-size:11px;color:var(--ink-2);border:1px solid var(--line);border-radius:3px;padding:4px 9px;background:var(--surface);}
+
+  .rule{height:1px;background:var(--line);border:0;margin:48px 0;}
+
+  h2{font-family:var(--disp);font-weight:700;font-size:26px;letter-spacing:-.015em;margin:0 0 8px;text-wrap:balance;}
+  h3{font-family:var(--disp);font-weight:600;font-size:19px;letter-spacing:-.01em;margin:0 0 4px;text-wrap:balance;}
+  .sec-no{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:10px;}
+  .sec-intro{color:var(--ink-2);max-width:66ch;margin:0 0 28px;}
+
+  figure{margin:0;}
+  .scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:20px 18px;}
+  .dgm{display:block;width:100%;min-width:700px;height:auto;color:var(--ink);}
+  figcaption{font-size:13.5px;color:var(--ink-2);max-width:74ch;margin-top:14px;}
+  figcaption b{color:var(--ink);font-weight:600;}
+  figcaption em{font-style:italic;}
+
+  .dgm text{font-family:var(--mono);font-size:11px;fill:var(--ink);}
+  .dgm .band{fill:var(--sunk);stroke:var(--line-2);stroke-width:1;}
+  .dgm .box{fill:var(--surface);stroke:var(--line-2);stroke-width:1;}
+  .dgm .chip{fill:var(--surface);stroke:var(--line-2);stroke-width:1;}
+  .dgm .t-title{font-family:var(--sans);font-weight:600;font-size:13px;fill:var(--ink);}
+  .dgm .t-sub{font-size:10px;fill:var(--ink-2);}
+  .dgm .t-band{font-size:10.5px;letter-spacing:.11em;fill:var(--ink-3);}
+  .dgm .t-edge{font-size:10px;fill:var(--ink-2);}
+  .dgm .t-chip{font-size:10px;fill:var(--ink-2);}
+  .dgm .flow{stroke:var(--ink-3);stroke-width:1.4;fill:none;}
+  .dgm .ar-n{fill:var(--ink-3);}
+  .dgm .acc-band{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.2;}
+  .dgm .acc-box{fill:var(--surface);stroke:var(--accent);stroke-width:1.2;}
+  .dgm .acc-t{fill:var(--accent-deep);}
+  .dgm .acc-flow{stroke:var(--accent);stroke-width:1.6;fill:none;}
+  .dgm .ar-a{fill:var(--accent);}
+  .dgm .acc-chip{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1;}
+
+  .lanes{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+  @media (max-width:900px){.lanes{grid-template-columns:1fr;gap:46px;}}
+
+  .lane-head{border-top:2px solid var(--accent);padding-top:12px;margin-bottom:24px;}
+  .lane-head p{margin:0;}
+  .lane-head .who{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;}
+  .lane-head .note{font-size:13.5px;color:var(--ink-2);margin-top:4px;}
+
+  ol.steps{list-style:none;margin:0;padding:0;}
+  li.step{position:relative;padding-left:40px;padding-bottom:28px;}
+  li.step:last-child{padding-bottom:0;}
+  li.step::before{content:"";position:absolute;left:11px;top:26px;bottom:0;width:1px;background:var(--line-2);}
+  li.step:last-child::before{display:none;}
+  .node{position:absolute;left:0;top:1px;width:23px;height:23px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);color:var(--ink-2);font-family:var(--mono);font-size:11px;display:grid;place-items:center;}
+  li.step.agent .node{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-deep);}
+
+  .actor{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:0;}
+  .said{margin:2px 0 10px;font-size:15.5px;font-weight:500;color:var(--ink);text-wrap:balance;}
+  .said em{font-style:normal;color:var(--ink-2);font-weight:400;}
+
+  ul.does{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px;}
+  ul.does li{position:relative;padding-left:15px;font-size:13.5px;color:var(--ink-2);}
+  ul.does li::before{content:"";position:absolute;left:0;top:10px;width:6px;height:1px;background:var(--line-2);}
+  ul.does li b{color:var(--ink);font-weight:500;}
+  code{font-family:var(--mono);font-size:12px;background:var(--sunk);border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink);}
+
+  .emits{margin-top:11px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+  .emits .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);}
+  .ev{font-family:var(--mono);font-size:11.5px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent-deep);border-radius:3px;padding:2px 7px;}
+
+  .mode{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-radius:3px;padding:2px 8px;display:inline-block;}
+  .m-pin{border:1px solid var(--line-2);color:var(--ink-2);background:transparent;}
+  .m-com{border:1px solid var(--accent);color:var(--accent-deep);background:var(--accent-soft);}
+  .m-gen{border:1px solid var(--accent);color:#FFFFFF;background:var(--accent);}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .m-gen{color:#0E1413;}}
+  :root[data-theme="dark"] .m-gen{color:#0E1413;}
+
+  .dial{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px 18px;margin-bottom:30px;}
+  .dial p{margin:0 0 12px;font-size:13.5px;color:var(--ink-2);}
+  .dial-row{display:flex;flex-wrap:wrap;gap:10px 26px;}
+  .dial-row div{font-size:13px;color:var(--ink-2);}
+  .dial-row div span{display:block;margin-bottom:4px;}
+
+  .flag{margin-top:11px;border-left:2px solid var(--warn);background:var(--warn-soft);padding:10px 13px;border-radius:0 4px 4px 0;font-size:13.5px;color:var(--ink);}
+  .flag .fcode{font-family:var(--mono);font-size:10.5px;color:var(--warn);letter-spacing:.08em;display:block;margin-bottom:3px;text-transform:uppercase;}
+
+  .closer{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;padding:24px 26px;margin-top:48px;}
+  .closer h3{margin-bottom:10px;}
+  .closer p{margin:0;color:var(--ink-2);max-width:72ch;}
+  .closer p + p{margin-top:12px;}
+  .closer b{color:var(--ink);font-weight:600;}
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">System design · design-system-grounded generative UI</p>
+  <h1>Agentic GenUI Playground</h1>
+  <p class="lede">A showcase, not an app. It exists to demonstrate one claim: an agent can compose UI freely, and <strong>the design system is what makes that composition safe, on-brand and repeatable</strong> rather than a novelty.</p>
+  <ul class="meta">
+    <li>LangGraph</li><li>AG-UI / SSE</li><li>A2UI v0.9</li><li>Zod gate</li><li>MCP + RAG</li><li>Postgres checkpointer</li><li>React + PDS</li>
+  </ul>
+
+  <hr class="rule">
+
+  <span class="sec-no">01 — Overall architecture</span>
+  <h2>Four layers and one turn</h2>
+  <p class="sec-intro">Each layer answers a different question: what the user sees, how it travels, who decides, and what constrains the decision. State cuts across all four. If a new feature doesn&rsquo;t sit in exactly one layer, it isn&rsquo;t scoped yet.</p>
+
+  <figure>
+    <div class="scroll">
+      <svg class="dgm" viewBox="0 0 1100 620" role="img" aria-label="Layered architecture: the client sends a prompt or user action over AG-UI to a LangGraph agent, which queries the design system through MCP and RAG, passes generated A2UI through a validator gate compiled from catalog.json, and streams the result back to the client. A Postgres checkpointer holds thread, persona and surface state.">
+        <defs>
+          <marker id="arN" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ar-n"/></marker>
+          <marker id="arA" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ar-a"/></marker>
+        </defs>
+
+        <rect class="band" x="40" y="40" width="620" height="110" rx="5"/>
+        <text class="t-band" x="56" y="62">1 · CLIENT — CONVERSATIONAL PANE</text>
+        <rect class="box" x="56" y="78" width="185" height="54" rx="4"/>
+        <text class="t-title" x="66" y="101">Chat</text>
+        <text class="t-sub" x="66" y="119">prompt · reply</text>
+        <rect class="box" x="257" y="78" width="185" height="54" rx="4"/>
+        <text class="t-title" x="267" y="101">Variant gallery</text>
+        <text class="t-sub" x="267" y="119">N surfaces, side by side</text>
+        <rect class="box" x="458" y="78" width="185" height="54" rx="4"/>
+        <text class="t-title" x="468" y="101">Trace + rationale</text>
+        <text class="t-sub" x="468" y="119">tool calls · sources</text>
+
+        <rect class="band" x="40" y="180" width="620" height="90" rx="5"/>
+        <text class="t-band" x="56" y="202">2 · PROTOCOL — AG-UI OVER SSE</text>
+        <rect class="chip" x="56" y="216" width="106" height="30" rx="3"/>
+        <text class="t-chip" x="66" y="235">TEXT_MESSAGE_*</text>
+        <rect class="acc-chip" x="172" y="216" width="90" height="30" rx="3"/>
+        <text class="acc-t" x="182" y="235" font-size="10">TOOL_CALL_*</text>
+        <rect class="acc-chip" x="272" y="216" width="50" height="30" rx="3"/>
+        <text class="acc-t" x="282" y="235" font-size="10">a2ui</text>
+        <rect class="acc-chip" x="332" y="216" width="86" height="30" rx="3"/>
+        <text class="acc-t" x="342" y="235" font-size="10">a2ui_patch</text>
+        <rect class="chip" x="428" y="216" width="94" height="30" rx="3"/>
+        <text class="t-chip" x="438" y="235">STATE_DELTA</text>
+        <text class="t-edge" x="644" y="235" text-anchor="end">one fixed vocabulary</text>
+
+        <rect class="band" x="40" y="300" width="620" height="170" rx="5"/>
+        <text class="t-band" x="56" y="322">3 · AGENT — LANGGRAPH</text>
+        <rect class="box" x="56" y="338" width="286" height="58" rx="4"/>
+        <text class="t-title" x="66" y="363">Assistant graph</text>
+        <text class="t-sub" x="66" y="381">route → generate one surface</text>
+        <rect class="box" x="358" y="338" width="286" height="58" rx="4"/>
+        <text class="t-title" x="368" y="363">Explorer graph</text>
+        <text class="t-sub" x="368" y="381">ground → reason → variants → patch</text>
+        <line class="flow" x1="199" y1="396" x2="199" y2="412" marker-end="url(#arN)"/>
+        <line class="flow" x1="501" y1="396" x2="501" y2="412" marker-end="url(#arN)"/>
+        <rect class="acc-box" x="56" y="416" width="588" height="40" rx="4"/>
+        <text class="acc-t" x="66" y="434" font-size="11.5">VALIDATOR GATE</text>
+        <text class="t-sub" x="66" y="449">Zod schemas compiled from catalog.json · repair loop · text fallback</text>
+
+        <rect class="band" x="40" y="500" width="620" height="80" rx="5"/>
+        <text class="t-band" x="56" y="522">STATE — CROSS-CUTTING</text>
+        <rect class="chip" x="56" y="534" width="74" height="30" rx="3"/>
+        <text class="t-chip" x="66" y="553">messages</text>
+        <rect class="chip" x="140" y="534" width="132" height="30" rx="3"/>
+        <text class="t-chip" x="150" y="553">persona · selection</text>
+        <rect class="chip" x="282" y="534" width="160" height="30" rx="3"/>
+        <text class="t-chip" x="292" y="553">surfaces { id → A2UI }</text>
+        <text class="t-edge" x="644" y="553" text-anchor="end">Postgres, keyed by threadId</text>
+
+        <rect class="acc-band" x="800" y="300" width="260" height="170" rx="5"/>
+        <text class="acc-t" x="814" y="320" font-size="10.5" letter-spacing=".11em">4 · GROUNDING</text>
+        <text class="t-sub" x="814" y="336">your design system</text>
+        <rect class="acc-box" x="814" y="346" width="232" height="36" rx="4"/>
+        <text class="t-title" x="824" y="369" font-size="12">catalog.json</text>
+        <text class="acc-t" x="1036" y="369" font-size="10" text-anchor="end">PUSH</text>
+        <rect class="acc-box" x="814" y="388" width="232" height="36" rx="4"/>
+        <text class="t-title" x="824" y="411" font-size="12">MCP servers</text>
+        <text class="acc-t" x="1036" y="411" font-size="10" text-anchor="end">PULL</text>
+        <rect class="acc-box" x="814" y="430" width="232" height="36" rx="4"/>
+        <text class="t-title" x="824" y="453" font-size="12">RAG endpoint</text>
+        <text class="acc-t" x="1036" y="453" font-size="10" text-anchor="end">PULL</text>
+
+        <line class="acc-flow" x1="662" y1="362" x2="796" y2="362" marker-end="url(#arA)"/>
+        <text class="t-edge" x="729" y="354" text-anchor="middle">query</text>
+        <line class="acc-flow" x1="798" y1="422" x2="664" y2="422" marker-end="url(#arA)"/>
+        <text class="t-edge" x="731" y="414" text-anchor="middle">answer + sources</text>
+
+        <line class="flow" x1="120" y1="150" x2="120" y2="176" marker-end="url(#arN)"/>
+        <text class="t-edge" x="130" y="169">prompt · userAction · refine</text>
+        <line class="flow" x1="120" y1="270" x2="120" y2="296" marker-end="url(#arN)"/>
+        <text class="t-edge" x="130" y="289">RunAgentInput</text>
+        <line class="flow" x1="580" y1="298" x2="580" y2="274" marker-end="url(#arN)"/>
+        <text class="t-edge" x="570" y="289" text-anchor="end">validated A2UI + events</text>
+        <line class="flow" x1="580" y1="178" x2="580" y2="154" marker-end="url(#arN)"/>
+        <text class="t-edge" x="570" y="169" text-anchor="end">render</text>
+        <line class="flow" x1="350" y1="472" x2="350" y2="498" marker-start="url(#arN)" marker-end="url(#arN)"/>
+        <text class="t-edge" x="360" y="489">read · write</text>
+      </svg>
+    </div>
+    <figcaption><b>One turn, end to end.</b> The request goes down the stack and the result comes back up &mdash; but grounding sits to the side, because the agent <em>pulls</em> it on demand rather than receiving it up front. Nothing reaches the wire until the validator gate approves it.</figcaption>
+  </figure>
+
+  <hr class="rule">
+
+  <span class="sec-no">02 — Where your team&rsquo;s work lands</span>
+  <h2>One catalog, three jobs</h2>
+  <p class="sec-intro">This is the impact argument in one picture. The artifact your team already maintains feeds three different parts of the system &mdash; so a component change propagates to all three at once, instead of being re-implemented three times.</p>
+
+  <figure>
+    <div class="scroll">
+      <svg class="dgm" viewBox="0 0 900 290" role="img" aria-label="catalog.json branches three ways: injected into the agent prompt as its component vocabulary, compiled into Zod schemas for the validator gate, and bound to PDS components in the renderer.">
+        <defs>
+          <marker id="arB" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ar-a"/></marker>
+        </defs>
+        <rect class="acc-band" x="40" y="106" width="190" height="64" rx="5"/>
+        <text class="acc-t" x="58" y="136" font-size="14">catalog.json</text>
+        <text class="t-sub" x="58" y="155">single source of truth</text>
+
+        <path class="acc-flow" d="M230 138 H360"/>
+        <path class="acc-flow" d="M360 62 V228"/>
+        <path class="acc-flow" d="M360 62 H494" marker-end="url(#arB)"/>
+        <path class="acc-flow" d="M360 138 H494" marker-end="url(#arB)"/>
+        <path class="acc-flow" d="M360 228 H494" marker-end="url(#arB)"/>
+        <text class="t-edge" x="428" y="54" text-anchor="middle">injected</text>
+        <text class="t-edge" x="428" y="130" text-anchor="middle">compiled</text>
+        <text class="t-edge" x="428" y="220" text-anchor="middle">bound</text>
+
+        <rect class="box" x="500" y="34" width="360" height="56" rx="4"/>
+        <text class="t-title" x="518" y="59">Prompt vocabulary</text>
+        <text class="t-sub" x="518" y="78">what the agent is allowed to name</text>
+        <rect class="box" x="500" y="110" width="360" height="56" rx="4"/>
+        <text class="t-title" x="518" y="135">Validator gate</text>
+        <text class="t-sub" x="518" y="154">what is allowed to reach the wire</text>
+        <rect class="box" x="500" y="200" width="360" height="56" rx="4"/>
+        <text class="t-title" x="518" y="225">Renderer map</text>
+        <text class="t-sub" x="518" y="244">A2UI node → PDS component + tokens</text>
+      </svg>
+    </div>
+    <figcaption><b>Change a component once; the agent&rsquo;s vocabulary, the safety gate and the rendered pixels all move together.</b> Guidelines and rationale deliberately do not travel this path &mdash; they are too large and too open-ended to inject, which is exactly why MCP and RAG exist as a separate, queryable layer.</figcaption>
+  </figure>
+
+  <hr class="rule">
+
+  <span class="sec-no">03 — User flow</span>
+  <h2>Two personas, the same rails</h2>
+  <p class="sec-intro">The customer flow and the designer flow run on identical protocol, validator and renderer. Only two things differ: which graph handles the turn, and how deeply it grounds before it draws.</p>
+
+  <div class="dial">
+    <p>Both flows move along one dial &mdash; how much the agent decides:</p>
+    <div class="dial-row">
+      <div><span class="mode m-pin">Pinned</span>agent fills a curated template</div>
+      <div><span class="mode m-com">Composed</span>agent picks a known pattern, fills it live</div>
+      <div><span class="mode m-gen">Generated</span>agent composes freely from the catalog</div>
+    </div>
+  </div>
+
+  <div class="lanes">
+
+    <div>
+      <div class="lane-head">
+        <p class="who">Persona A — Customer</p>
+        <h3>Choosing a plan</h3>
+        <p class="note">Assistant graph. Grounding is mostly pushed; the catalog is enough.</p>
+      </div>
+      <ol class="steps">
+
+        <li class="step">
+          <div class="node">1</div>
+          <p class="actor">User</p>
+          <p class="said">&ldquo;Show me the plans&rdquo;</p>
+          <ul class="does">
+            <li>Router classifies the turn as <b>needs UI</b></li>
+            <li><span class="mode m-pin">Pinned</span> &mdash; the plan grid is curated and high-traffic</li>
+            <li>Grounding: catalog only</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">a2ui</span></div>
+        </li>
+
+        <li class="step">
+          <div class="node">2</div>
+          <p class="actor">User</p>
+          <p class="said">Taps <em>Choose Unlimited Plus</em></p>
+          <ul class="does">
+            <li>Client returns a <code>userAction</code> carrying the node id</li>
+            <li><code>selectedPlan</code> is written to the checkpoint</li>
+            <li>Graph resumes on the same <code>threadId</code> &mdash; nothing is re-asked</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">STATE_DELTA</span></div>
+        </li>
+
+        <li class="step agent">
+          <div class="node">3</div>
+          <p class="actor">Agent</p>
+          <p class="said">&ldquo;Here&rsquo;s what you can add&rdquo;</p>
+          <ul class="does">
+            <li><span class="mode m-com">Composed</span> &mdash; pattern known, contents vary</li>
+            <li>Grounding: <b>MCP</b> &mdash; which add-ons are valid for this plan</li>
+            <li>Validator gate passes the add-on picker</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">TOOL_CALL_*</span><span class="ev">a2ui</span></div>
+        </li>
+
+        <li class="step">
+          <div class="node">4</div>
+          <p class="actor">User</p>
+          <p class="said">&ldquo;I travel a lot &mdash; what matters?&rdquo;</p>
+          <ul class="does">
+            <li>No template exists for this &rarr; <span class="mode m-gen">Generated</span></li>
+            <li>Grounding: <b>RAG</b> for how to present a comparison, <b>catalog</b> for what to build it from</li>
+            <li>Gate rejects &rarr; repair loop &rarr; passes</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">TOOL_CALL_*</span><span class="ev">a2ui</span></div>
+        </li>
+      </ol>
+    </div>
+
+    <div>
+      <div class="lane-head">
+        <p class="who">Persona B — Internal designer</p>
+        <h3>Exploring plan tiles</h3>
+        <p class="note">Explorer graph. Grounding is pulled first, and the reasoning is shown.</p>
+      </div>
+      <ol class="steps">
+
+        <li class="step">
+          <div class="node">1</div>
+          <p class="actor">Designer</p>
+          <p class="said">&ldquo;Show me options for a plan tile &mdash; new user vs existing user&rdquo;</p>
+          <ul class="does">
+            <li>Mode switch routes the turn to the <b>Explorer graph</b></li>
+            <li><code>persona: designer</code> enters graph state</li>
+          </ul>
+        </li>
+
+        <li class="step agent">
+          <div class="node">2</div>
+          <p class="actor">Agent</p>
+          <p class="said">Grounds before it draws</p>
+          <ul class="does">
+            <li><b>RAG</b> &mdash; tile guidelines, new-user acquisition rules</li>
+            <li><b>MCP</b> &mdash; approved tile patterns, token scale</li>
+            <li>Every query and its citations stream into the trace panel</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">TOOL_CALL_*</span></div>
+        </li>
+
+        <li class="step agent">
+          <div class="node">3</div>
+          <p class="actor">Agent</p>
+          <p class="said">Generates three variants</p>
+          <ul class="does">
+            <li><span class="mode m-gen">Generated</span> &mdash; structured output against catalog schemas</li>
+            <li>The gate runs on <b>each variant independently</b></li>
+            <li>Stored as <code>surfaces { var-1, var-2, var-3 }</code></li>
+            <li>Each variant carries its own rationale and sources</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">a2ui ×3</span></div>
+        </li>
+
+        <li class="step">
+          <div class="node">4</div>
+          <p class="actor">Designer</p>
+          <p class="said">&ldquo;Add a badge on option 3, top right&rdquo;</p>
+          <ul class="does">
+            <li>Resolve target &rarr; <code>var-3</code>, node <code>tile.header</code></li>
+            <li>Re-ground: badge usage rules</li>
+            <li>Emits a <b>JSON Patch</b>, not a new surface</li>
+            <li>Options 1 and 2 stay byte-identical &mdash; no drift</li>
+          </ul>
+          <div class="emits"><span class="lbl">emits</span><span class="ev">a2ui_patch</span></div>
+        </li>
+
+        <li class="step agent">
+          <div class="node">5</div>
+          <p class="actor">Agent</p>
+          <p class="said">The design system answers back</p>
+          <ul class="does">
+            <li>Applies the change <b>and</b> flags it, with the citation</li>
+            <li>Designer accepts the alternative or overrides &rarr; back to step 4</li>
+          </ul>
+          <div class="flag">
+            <span class="fcode">DS-207 · badge usage</span>
+            Badges are reserved for system status, not merchandising. Consider <code>Tag</code> instead.
+          </div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="closer">
+    <h3>What the audience should actually watch</h3>
+    <p>A demo where UI simply appears is indistinguishable from a designer with a good prompt. The thing worth pointing at is the <b>trace panel</b> &mdash; the agent consulting your guidelines, citing your rules, and being corrected by your validator.</p>
+    <p>That is why <code>TOOL_CALL_*</code> is a first-class event in the protocol rather than a debug log, and why every grounding tool returns <code>{ answer, sources[] }</code>. Observability of the grounding step is an architecture decision, not a UI one.</p>
+  </div>
+
+</div>
+
+</body>
+</html>

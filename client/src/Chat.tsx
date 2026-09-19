@@ -11,11 +11,29 @@
  * A stable `threadId` is sent every turn so the server's checkpointer keeps
  * conversation memory; only the newest user message is sent. "New chat" rotates
  * the threadId and tears down rendered surfaces.
+ *
+ * UI actions (P6): when a component fires an A2UI `event` action (e.g. a plan's
+ * "Choose" button), it is POSTed back to /agui/run on the same threadId as the
+ * A2UI v0.9 client-to-server message in AG-UI `forwardedProps.a2uiAction`, and
+ * shown as a compact "UI action" user bubble. The agent replies like any turn.
+ *
+ * Persona (P8): the header switch sends RunAgentInput `state.persona`. The
+ * explorer gets a baseline plus variants per request; each surface's
+ * `meta.card` (label, rationale, sources, changes, flags) renders as a
+ * VariantCard around it. Refinements arrive as new cards in the new turn.
  */
 import { useMemo, useRef, useState } from "react";
 import { A2uiSurface } from "@a2ui/react/v0_9";
 import { MessageProcessor } from "@a2ui/web_core/v0_9";
 import { createPdsCatalog, CATALOG_NAME } from "./pdsCatalog";
+import TracePanel, { applyTraceEvent, isTraceEvent, type TraceItem } from "./TracePanel";
+import VariantCard from "./VariantCard";
+
+type Persona = "assistant" | "explorer";
+const PERSONAS: { id: Persona; label: string; hint: string }[] = [
+  { id: "assistant", label: "Assistant", hint: "Helps a customer: answers, curated screens, new UI when nothing fits" },
+  { id: "explorer", label: "Explorer", hint: "Helps a designer: production baseline plus variants, refine one by name" },
+];
 
 type Role = "user" | "assistant";
 interface Msg {
@@ -23,6 +41,16 @@ interface Msg {
   content: string;
   surfaceIds?: string[]; // ids of A2UI surfaces rendered in this turn
   status?: string; // transient progress note (e.g. "Generating UI…")
+  kind?: "action"; // a user turn that came from a UI action, not typed text
+  trace?: TraceItem[]; // what the agent did this turn (P7): steps + traced calls
+}
+
+/** Short label for an action bubble: the event name plus its scalar context values. */
+function actionLabel(action: any): string {
+  const values = Object.values(action?.context ?? {})
+    .filter((v) => ["string", "number", "boolean"].includes(typeof v))
+    .map(String);
+  return [action?.name ?? "action", ...values].join(" · ");
 }
 
 const uuid = () =>
@@ -59,6 +87,9 @@ export default function Chat() {
   const [threadId, setThreadId] = useState(newThreadId);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [surfacesById, setSurfacesById] = useState<Record<string, any>>({});
+  // meta of each rendered surface (by client surface id): meta.card drives the variant card (P8)
+  const [metaById, setMetaById] = useState<Record<string, any>>({});
+  const [persona, setPersona] = useState<Persona>("assistant");
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +97,9 @@ export default function Chat() {
   // Index of the assistant bubble for the in-flight turn, so the processor's
   // (async) onSurfaceCreated callback can attach surfaces to the right message.
   const turnRef = useRef<number>(-1);
+  // Set every render so the (memoized) processor's action sink always sees the
+  // current threadId / streaming state.
+  const onActionRef = useRef<(action: any) => void>(() => {});
 
   const scrollToBottom = () =>
     requestAnimationFrame(() => {
@@ -77,11 +111,8 @@ export default function Chat() {
   // messages create a surface; we capture the surface object and link its id to
   // the current assistant turn so it renders inline.
   const processor = useMemo(() => {
-    const proc = new MessageProcessor([createPdsCatalog()], (action: any) => {
-      // Phase 5 will round-trip this back to the agent as a userAction. For now,
-      // make event wiring observable.
-      console.log("[a2ui event]", action);
-    });
+    // Action sink: A2UI `event` actions round-trip to the agent (P6).
+    const proc = new MessageProcessor([createPdsCatalog()], (action: any) => onActionRef.current(action));
     proc.onSurfaceCreated((surface: any) => {
       setSurfacesById((prev) => ({ ...prev, [surface.id]: surface }));
       const idx = turnRef.current;
@@ -111,6 +142,7 @@ export default function Chat() {
     const surfaceId = `surface_${uuid()}`;
     const messagesIn = normalizeA2ui(value?.a2ui, surfaceId);
     if (messagesIn.length === 0) return;
+    if (value?.meta) setMetaById((prev) => ({ ...prev, [surfaceId]: value.meta }));
     try {
       processor.processMessages(messagesIn);
     } catch (e: any) {
@@ -118,17 +150,30 @@ export default function Chat() {
     }
   };
 
-  const send = async () => {
+  const send = () => {
     const text = input.trim();
     if (!text || streaming) return;
-
-    setError(null);
     setInput("");
+    runTurn(text);
+  };
+
+  onActionRef.current = (action: any) => {
+    if (streaming) {
+      console.warn("[a2ui event] ignored while a reply is streaming", action);
+      return;
+    }
+    runTurn(actionLabel(action), action);
+  };
+
+  /** One turn: typed text, or a UI action (sent as forwardedProps.a2uiAction). */
+  const runTurn = async (text: string, action?: any) => {
+    setError(null);
     // Optimistically add the user message + an empty assistant bubble to fill.
     // Record the assistant index for the surface-attach callback.
     setMessages((m) => {
       turnRef.current = m.length + 1;
-      return [...m, { role: "user", content: text }, { role: "assistant", content: "" }];
+      const user: Msg = action ? { role: "user", content: text, kind: "action" } : { role: "user", content: text };
+      return [...m, user, { role: "assistant", content: "" }];
     });
     setStreaming(true);
     scrollToBottom();
@@ -151,15 +196,35 @@ export default function Chat() {
         return copy;
       });
 
+    // Fold a trace event (STEP_* / TOOL_CALL_*) into the last (assistant) message.
+    const traceOnAssistant = (evt: any) =>
+      setMessages((m) => {
+        const copy = m.slice();
+        const last = copy[copy.length - 1];
+        if (last?.role === "assistant") copy[copy.length - 1] = { ...last, trace: applyTraceEvent(last.trace ?? [], evt) };
+        return copy;
+      });
+
     try {
       const resp = await fetch("/agui/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          threadId,
-          runId: `run_${Date.now()}`,
-          messages: [{ id: `u_${Date.now()}`, role: "user", content: text }],
-        }),
+        body: JSON.stringify(
+          action
+            ? {
+                threadId,
+                runId: `run_${Date.now()}`,
+                messages: [],
+                state: { persona },
+                forwardedProps: { a2uiAction: { version: "v0.9", action } },
+              }
+            : {
+                threadId,
+                runId: `run_${Date.now()}`,
+                messages: [{ id: `u_${Date.now()}`, role: "user", content: text }],
+                state: { persona },
+              }
+        ),
       });
       if (!resp.ok || !resp.body) throw new Error(`HTTP ${resp.status}`);
 
@@ -186,6 +251,8 @@ export default function Chat() {
           } else if (evt.type === "CUSTOM" && evt.name === "status") {
             setStatusOnAssistant(evt.value?.text ?? "");
             scrollToBottom();
+          } else if (isTraceEvent(evt)) {
+            traceOnAssistant(evt);
           } else if (evt.type === "RUN_ERROR") {
             setError(evt.message || "Run error");
           }
@@ -209,6 +276,7 @@ export default function Chat() {
       }
     });
     setSurfacesById({});
+    setMetaById({});
     setThreadId(newThreadId());
     setMessages([]);
     setError(null);
@@ -218,30 +286,61 @@ export default function Chat() {
     <div className="chat">
       <div className="chat-head">
         <span className="chat-thread">thread: {threadId.replace("thread_", "").slice(0, 8)}…</span>
+        <div className="persona-switch" role="radiogroup" aria-label="Persona">
+          {PERSONAS.map((p) => (
+            <button
+              key={p.id}
+              role="radio"
+              aria-checked={persona === p.id}
+              title={p.hint}
+              className={persona === p.id ? "active" : ""}
+              onClick={() => setPersona(p.id)}
+              disabled={streaming}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
         <button className="btn" onClick={newChat} disabled={streaming}>New chat</button>
       </div>
 
       <div className="chat-log" ref={scrollRef}>
         {messages.length === 0 && (
           <div className="empty">
-            Chat, or ask for UI — e.g. “show me a sign-up form with name, email and a
-            submit button”. Valid layouts render inline; anything else replies as text.
+            {persona === "explorer" ? (
+              <>
+                Explore curated screens — e.g. “show me plan details”, then “add network coverage info to the plan
+                view” for a baseline plus variants, then “on variant 2, make the badge say Recommended”.
+              </>
+            ) : (
+              <>
+                Chat, or ask for UI — e.g. “show me a sign-up form with name, email and a submit button”. Valid
+                layouts render inline; anything else replies as text.
+              </>
+            )}
           </div>
         )}
         {messages.map((m, i) => (
-          <div key={i} className={`bubble ${m.role}${m.surfaceIds?.length ? " has-surface" : ""}`}>
-            <div className="who">{m.role === "user" ? "You" : "Assistant"}</div>
+          <div key={i} className={`bubble ${m.role}${m.kind ? ` ${m.kind}` : ""}${m.surfaceIds?.length ? " has-surface" : ""}`}>
+            <div className="who">{m.role === "user" ? (m.kind === "action" ? "You · UI action" : "You") : "Assistant"}</div>
             {m.content && <div className="text">{m.content}</div>}
-            {m.surfaceIds?.map((id) =>
-              surfacesById[id] ? (
+            {m.surfaceIds?.map((id) => {
+              if (!surfacesById[id]) return null;
+              const card = metaById[id]?.card;
+              return card ? (
+                <VariantCard key={id} card={card}>
+                  <A2uiSurface surface={surfacesById[id]} />
+                </VariantCard>
+              ) : (
                 <div key={id} className="surface">
                   <A2uiSurface surface={surfacesById[id]} />
                 </div>
-              ) : null
-            )}
+              );
+            })}
             {!m.content && !m.surfaceIds?.length && streaming && i === messages.length - 1 && (
               <div className="text status">{m.status || "…"}</div>
             )}
+            {m.trace && <TracePanel trace={m.trace} live={streaming && i === messages.length - 1} />}
           </div>
         ))}
         {error && <div className="error">{error}</div>}

@@ -187,7 +187,7 @@ export default function App() {
       setText(pretty);
       renderText(pretty);
     } catch (e: any) {
-      setError(`Request failed: ${e.message}. Is the server running on :8080?`);
+      setError(`Request failed: ${e.message}. Is the server running on :8090 (npm run agui)?`);
     } finally {
       setLoading(false);
     }

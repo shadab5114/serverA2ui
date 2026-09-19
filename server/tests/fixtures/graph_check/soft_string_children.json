@@ -1,0 +1,118 @@
+{
+  "input": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "modal",
+                "open"
+              ]
+            },
+            {
+              "id": "modal",
+              "component": "Modal",
+              "children": "form"
+            },
+            {
+              "id": "form",
+              "component": "Column",
+              "children": [
+                "f1"
+              ]
+            },
+            {
+              "id": "f1",
+              "component": "InputField",
+              "label": "Email"
+            },
+            {
+              "id": "open",
+              "component": "Button",
+              "children": "Open"
+            },
+            {
+              "id": "label-only",
+              "component": "Button",
+              "children": "Sign in"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "output": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "Column",
+              "children": [
+                "modal",
+                "open",
+                "label-only"
+              ]
+            },
+            {
+              "id": "modal",
+              "component": "Modal",
+              "children": "form"
+            },
+            {
+              "id": "form",
+              "component": "Column",
+              "children": [
+                "f1"
+              ]
+            },
+            {
+              "id": "f1",
+              "component": "InputField",
+              "label": "Email"
+            },
+            {
+              "id": "open",
+              "component": "Button",
+              "children": "Open"
+            },
+            {
+              "id": "label-only",
+              "component": "Button",
+              "children": "Sign in"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "result": {
+    "repaired": true,
+    "warnings": [
+      "Attached 1 orphan component(s) to root: label-only."
+    ],
+    "errors": []
+  }
+}

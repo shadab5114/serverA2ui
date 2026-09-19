@@ -1,0 +1,417 @@
+<!-- Source of truth for the GenUI stack map page.
+     Edit THIS file. Then run:  npm run docs:genui
+     -> regenerates docs/genui-stack.html (standalone, shareable). -->
+<title>GenUI Stack Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --sans:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+    --disp:"Archivo","IBM Plex Sans",system-ui,sans-serif;
+    --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+
+    --ground:#F2F4F3;
+    --surface:#FFFFFF;
+    --sunk:#E8ECEB;
+    --ink:#16211F;
+    --ink-2:#5A6866;
+    --ink-3:#8A9997;
+    --line:#D3DBD9;
+    --line-2:#BFCAC8;
+    --accent:#0B7A73;
+    --accent-deep:#07564F;
+    --accent-soft:#DDEDEB;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E1413;
+      --surface:#161E1D;
+      --sunk:#101817;
+      --ink:#E6EDEB;
+      --ink-2:#93A3A0;
+      --ink-3:#6C7C79;
+      --line:#293533;
+      --line-2:#364543;
+      --accent:#43C3B5;
+      --accent-deep:#7FDDD1;
+      --accent-soft:#15302D;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1413;
+    --surface:#161E1D;
+    --sunk:#101817;
+    --ink:#E6EDEB;
+    --ink-2:#93A3A0;
+    --ink-3:#6C7C79;
+    --line:#293533;
+    --line-2:#364543;
+    --accent:#43C3B5;
+    --accent-deep:#7FDDD1;
+    --accent-soft:#15302D;
+  }
+
+  body{background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1360px;margin:0 auto;padding-inline:24px;padding-block:56px 80px;}
+  @media (max-width:480px){.wrap{padding-inline:16px;padding-block:36px 56px;}}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 14px;}
+  h1{font-family:var(--disp);font-weight:700;font-size:clamp(34px,6vw,54px);line-height:1.02;letter-spacing:-.025em;margin:0 0 18px;text-wrap:balance;}
+  .lede{font-size:17px;color:var(--ink-2);max-width:66ch;margin:0 0 34px;}
+  .lede strong{color:var(--ink);font-weight:600;}
+
+  h2{font-family:var(--disp);font-weight:700;font-size:22px;letter-spacing:-.012em;margin:0 0 16px;text-wrap:balance;}
+
+  figure{margin:0;}
+  .scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px 14px;}
+  .dgm{display:block;width:100%;min-width:1040px;height:auto;color:var(--ink);}
+  figcaption{font-size:13.5px;color:var(--ink-2);max-width:80ch;margin-top:14px;}
+  figcaption b{color:var(--ink);font-weight:600;}
+
+  /* ---- diagram ---- */
+  .dgm text{font-family:var(--mono);font-size:10px;fill:var(--ink-2);}
+  .dgm .band{fill:var(--sunk);stroke:var(--line-2);stroke-width:1;}
+  .dgm .grp{fill:var(--ground);stroke:var(--line-2);stroke-width:1;}
+  .dgm .box{fill:var(--surface);stroke:var(--line-2);stroke-width:1;}
+  .dgm .box.a{stroke:var(--accent);stroke-width:1.4;}
+  .dgm .box.plan{fill:transparent;stroke:var(--ink-3);stroke-dasharray:5 4;}
+  .dgm .t-title{font-family:var(--sans);font-weight:600;font-size:13.5px;fill:var(--ink);}
+  .dgm .t-title.sm{font-size:12.5px;}
+  .dgm .t-grp{font-family:var(--disp);font-weight:700;font-size:17px;fill:var(--ink);}
+  .dgm .t-band{font-size:11px;letter-spacing:.13em;fill:var(--ink);font-weight:500;}
+  .dgm .t-meta{font-size:10.5px;fill:var(--ink-3);}
+  .dgm .t-tier{font-size:10px;letter-spacing:.14em;fill:var(--ink-3);}
+  .dgm .t-tag{font-size:9.5px;letter-spacing:.1em;fill:var(--ink-3);}
+  .dgm .t-tag.a{fill:var(--accent-deep);}
+  .dgm .t-plan{fill:var(--ink-3);}
+  .dgm .t-edge{font-size:10px;fill:var(--ink-2);}
+  .dgm .t-edge.a{fill:var(--accent-deep);}
+
+  .dgm .dots{fill:none;stroke-width:2.3;stroke-linecap:round;stroke-dasharray:0 7;animation:flow 1.15s linear infinite;}
+  .dgm .dots.n{stroke:var(--ink-2);}
+  .dgm .dots.a{stroke:var(--accent);}
+  .dgm .dots.still{animation:none;}
+  .dgm .hn{fill:var(--ink-2);}
+  .dgm .ha{fill:var(--accent);}
+  @keyframes flow{to{stroke-dashoffset:-14;}}
+  @media (prefers-reduced-motion:reduce){.dgm .dots{animation:none;}}
+
+  /* ---- legend ---- */
+  .legend{display:flex;flex-wrap:wrap;gap:12px 28px;margin:18px 0 0;padding:0;list-style:none;}
+  .legend li{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink-2);}
+  .legend svg{flex:none;}
+  .sw-n{stroke:var(--ink-2);}
+  .sw-a{stroke:var(--accent);}
+  .sw-box{fill:var(--surface);stroke:var(--accent);stroke-width:1.4;}
+  .sw-plan{fill:none;stroke:var(--ink-3);stroke-dasharray:4 3;}
+  .sw-tag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--accent-deep);border:1px solid var(--accent);background:var(--accent-soft);border-radius:3px;padding:1px 6px;}
+
+  .rule{height:1px;background:var(--line);border:0;margin:48px 0;}
+
+  /* ---- lower sections ---- */
+  .cols{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:56px;}
+  @media (max-width:900px){.cols{grid-template-columns:1fr;gap:44px;}}
+
+  ol.req{list-style:none;margin:0;padding:0;counter-reset:req;display:flex;flex-direction:column;gap:14px;}
+  ol.req li{counter-increment:req;position:relative;padding-left:40px;font-size:14.5px;color:var(--ink-2);max-width:68ch;}
+  ol.req li::before{content:counter(req);position:absolute;left:0;top:1px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);font-family:var(--mono);font-size:11px;color:var(--ink-2);display:grid;place-items:center;}
+  ol.req li b{color:var(--ink);font-weight:600;}
+  code{font-family:var(--mono);font-size:12px;background:var(--sunk);border:1px solid var(--line);border-radius:3px;padding:1px 5px;color:var(--ink);}
+
+  .status{display:flex;flex-direction:column;gap:22px;}
+  .status h3{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:500;margin:0 0 8px;color:var(--ink-3);}
+  .status h3.a{color:var(--accent);}
+  .status ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px;}
+  .status li{font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:3px 9px;}
+  .status .existing li{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-deep);}
+  .status .deferred li{background:transparent;border-style:dashed;border-color:var(--ink-3);color:var(--ink-2);}
+  .status p{margin:8px 0 0;font-size:13px;color:var(--ink-2);}
+</style>
+
+<div class="wrap">
+
+  <p class="eyebrow">Runtime map · target architecture · Python backend</p>
+  <h1>GenUI Stack Map</h1>
+  <p class="lede">Every runtime entity in the playground and how they connect. The React client stays as it is. The server is rebuilt in Python behind <strong>the same wire contract</strong>. For every prompt, it decides whether to reuse a curated template or create new UI from the catalog.</p>
+
+  <figure>
+    <div class="scroll">
+      <svg class="dgm" viewBox="0 0 1340 940" role="img" aria-label="Stack map. Frontend: AG-UI client, A2UI renderer, chat pane with persona switch, variant gallery, trace panel. The AG-UI client posts to a Python FastAPI server. Inside one LangGraph graph, a pipeline runs Decide, Policy (from personas.json), Ground, Build and Verify; text and template turns skip grounding. The graph uses seven adapters: catalog, template store, data providers, checkpointer, MCP client, RAG client and LLM client. They connect to the pds-core package, repo templates and mock data, Postgres, existing MCP servers, an existing RAG endpoint and an LLM provider. Verified UI and streamed text go back through an AG-UI encoder over SSE. pds-core also supplies components and tokens to the renderer. Redis and an object store for templates are planned, not in v1.">
+        <defs>
+          <marker id="hN" viewBox="0 0 10 8" refX="8" refY="4" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="8" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="hn"/></marker>
+          <marker id="hA" viewBox="0 0 10 8" refX="8" refY="4" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="8" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ha"/></marker>
+        </defs>
+
+        <!-- ================= FRONTEND ================= -->
+        <rect class="band" x="40" y="40" width="1260" height="144" rx="6"/>
+        <text class="t-band" x="60" y="64">FRONTEND · BROWSER</text>
+        <text class="t-meta" x="1280" y="64" text-anchor="end">React 19 · Vite · :5176</text>
+
+        <rect class="box" x="60" y="96" width="228" height="60" rx="4"/>
+        <text class="t-title" x="74" y="121">AG-UI client</text>
+        <text class="t-sub" x="74" y="141">fetch · SSE reader</text>
+
+        <rect class="box a" x="308" y="96" width="228" height="60" rx="4"/>
+        <text class="t-title" x="322" y="121">A2UI renderer</text>
+        <text class="t-sub" x="322" y="141">@a2ui/react · PDS components</text>
+
+        <rect class="box" x="556" y="96" width="228" height="60" rx="4"/>
+        <text class="t-title" x="570" y="121">Chat pane</text>
+        <text class="t-sub" x="570" y="141">prompt · reply · persona switch</text>
+
+        <rect class="box" x="804" y="96" width="228" height="60" rx="4"/>
+        <text class="t-title" x="818" y="121">Variant gallery</text>
+        <text class="t-sub" x="818" y="141">baseline + variants</text>
+
+        <rect class="box" x="1052" y="96" width="228" height="60" rx="4"/>
+        <text class="t-title" x="1066" y="121">Trace panel</text>
+        <text class="t-sub" x="1066" y="141">decisions · tool calls · sources</text>
+
+        <path class="dots n" d="M174 96 V82 H1166 V94" marker-end="url(#hN)"/>
+        <path class="dots n" d="M422 82 V94" marker-end="url(#hN)"/>
+        <path class="dots n" d="M670 82 V94" marker-end="url(#hN)"/>
+        <path class="dots n" d="M918 82 V94" marker-end="url(#hN)"/>
+        <text class="t-edge" x="670" y="76" text-anchor="middle">dispatches text · surfaces · patches · tool calls</text>
+
+        <!-- ================= CHANNEL: client <-> server ================= -->
+        <path class="dots n" d="M200 156 V286" marker-end="url(#hN)"/>
+        <text class="t-edge" x="192" y="216" text-anchor="end">POST /agui/run</text>
+
+        <path class="dots n" d="M720 288 V222 H250 V158" marker-end="url(#hN)"/>
+        <text class="t-edge" x="485" y="239" text-anchor="middle">SSE · AG-UI events</text>
+
+        <!-- ================= SERVER ================= -->
+        <rect class="band" x="40" y="246" width="940" height="500" rx="6"/>
+        <text class="t-band" x="60" y="270">SERVER · PYTHON</text>
+        <text class="t-meta" x="960" y="270" text-anchor="end">FastAPI · uvicorn · :8090</text>
+
+        <text class="t-tier" x="60" y="321">EDGE</text>
+        <text class="t-tier" x="60" y="470">AGENT</text>
+        <text class="t-tier" x="60" y="664">ADAPTERS</text>
+
+        <rect class="box" x="160" y="288" width="260" height="58" rx="4"/>
+        <text class="t-title" x="174" y="312">FastAPI</text>
+        <text class="t-sub" x="174" y="331">POST /agui/run · uvicorn</text>
+
+        <rect class="box" x="700" y="288" width="260" height="58" rx="4"/>
+        <text class="t-title" x="714" y="312">AG-UI encoder</text>
+        <text class="t-sub" x="714" y="331">ag-ui-protocol · SSE</text>
+
+        <!-- LangGraph: one graph, the decision pipeline -->
+        <rect class="grp" x="150" y="372" width="820" height="228" rx="6"/>
+
+        <rect class="box" x="170" y="410" width="140" height="56" rx="4"/>
+        <text class="t-title" x="182" y="434">Decide</text>
+        <text class="t-sub" x="182" y="453">template or new?</text>
+
+        <rect class="box" x="330" y="410" width="140" height="56" rx="4"/>
+        <text class="t-title" x="342" y="434">Policy</text>
+        <text class="t-sub" x="342" y="453">persona rules</text>
+
+        <rect class="box a" x="490" y="410" width="140" height="56" rx="4"/>
+        <text class="t-title" x="502" y="434">Ground</text>
+        <text class="t-sub" x="502" y="453">cited design brief</text>
+
+        <rect class="box" x="650" y="410" width="140" height="56" rx="4"/>
+        <text class="t-title" x="662" y="434">Build</text>
+        <text class="t-sub" x="662" y="453">fill · patch · new</text>
+
+        <rect class="box a" x="810" y="410" width="140" height="56" rx="4"/>
+        <text class="t-title" x="822" y="434">Verify</text>
+        <text class="t-sub" x="822" y="453">schema + guidelines</text>
+
+        <path class="dots n" d="M310 438 H328" marker-end="url(#hN)"/>
+        <path class="dots n" d="M470 438 H488" marker-end="url(#hN)"/>
+        <path class="dots n" d="M630 438 H648" marker-end="url(#hN)"/>
+        <path class="dots n" d="M790 438 H808" marker-end="url(#hN)"/>
+
+        <path class="dots n" d="M290 346 V408" marker-end="url(#hN)"/>
+        <text class="t-edge" x="300" y="364">RunAgentInput</text>
+
+        <path class="dots n" d="M420 410 V394 H700 V408" marker-end="url(#hN)"/>
+        <text class="t-edge" x="560" y="389" text-anchor="middle">TEXT · TEMPLATE skip grounding</text>
+
+        <path class="dots n" d="M760 410 V348" marker-end="url(#hN)"/>
+        <text class="t-edge" x="768" y="362">text stream</text>
+
+        <path class="dots a" d="M930 410 V348" marker-end="url(#hA)"/>
+        <text class="t-edge a" x="922" y="362" text-anchor="end">verified UI</text>
+
+        <path class="dots a" d="M870 466 V484 H720 V468" marker-end="url(#hA)"/>
+        <text class="t-edge a" x="795" y="497" text-anchor="middle">repair</text>
+
+        <rect class="box" x="330" y="512" width="140" height="48" rx="4"/>
+        <text class="t-title sm" x="342" y="533">personas.json</text>
+        <text class="t-sub" x="342" y="551">per-persona rules</text>
+        <path class="dots n" d="M400 512 V468" marker-end="url(#hN)"/>
+        <text class="t-edge" x="408" y="494">rules</text>
+
+        <text class="t-grp" x="170" y="540">LangGraph</text>
+        <text class="t-sub" x="170" y="558">one graph · both personas</text>
+
+        <!-- container <-> adapters -->
+        <path class="dots a" d="M210 630 V602" marker-end="url(#hA)"/>
+        <text class="t-edge a" x="218" y="620">schemas</text>
+        <path class="dots a" d="M326 630 V602" marker-end="url(#hA)"/>
+        <text class="t-edge a" x="334" y="620">templates</text>
+        <path class="dots n" d="M442 630 V602" marker-end="url(#hN)"/>
+        <text class="t-edge" x="450" y="620">data</text>
+        <path class="dots n still" d="M558 602 V630" marker-start="url(#hN)" marker-end="url(#hN)"/>
+        <text class="t-edge" x="566" y="620">state</text>
+        <path class="dots n" d="M674 602 V630" marker-end="url(#hN)"/>
+        <text class="t-edge" x="682" y="620">tool calls</text>
+        <path class="dots n" d="M790 602 V630" marker-end="url(#hN)"/>
+        <text class="t-edge" x="798" y="620">tool calls</text>
+        <path class="dots n" d="M906 602 V630" marker-end="url(#hN)"/>
+        <text class="t-edge" x="914" y="620">prompts</text>
+
+        <!-- adapters row -->
+        <rect class="box a" x="160" y="632" width="100" height="56" rx="4"/>
+        <text class="t-title sm" x="170" y="656">Catalog</text>
+        <text class="t-sub" x="170" y="675">read once</text>
+
+        <rect class="box a" x="276" y="632" width="100" height="56" rx="4"/>
+        <text class="t-title sm" x="286" y="656">Templates</text>
+        <text class="t-sub" x="286" y="675">TemplateStore</text>
+
+        <rect class="box" x="392" y="632" width="100" height="56" rx="4"/>
+        <text class="t-title sm" x="402" y="656">Providers</text>
+        <text class="t-sub" x="402" y="675">plans · add-ons</text>
+
+        <rect class="box" x="508" y="632" width="100" height="56" rx="4"/>
+        <text class="t-title sm" x="518" y="656">Checkpointer</text>
+        <text class="t-sub" x="518" y="675">psycopg3</text>
+
+        <rect class="box" x="624" y="632" width="100" height="56" rx="4"/>
+        <text class="t-title sm" x="634" y="656">MCP client</text>
+        <text class="t-sub" x="634" y="675">mcp-adapters</text>
+
+        <rect class="box" x="740" y="632" width="100" height="56" rx="4"/>
+        <text class="t-title sm" x="750" y="656">RAG client</text>
+        <text class="t-sub" x="750" y="675">httpx</text>
+
+        <rect class="box" x="856" y="632" width="100" height="56" rx="4"/>
+        <text class="t-title sm" x="866" y="656">LLM client</text>
+        <text class="t-sub" x="866" y="675">langchain</text>
+
+        <!-- ================= EXTERNAL ================= -->
+        <rect class="band" x="1040" y="360" width="260" height="386" rx="6"/>
+        <text class="t-band" x="1056" y="384">EXTERNAL SERVICES</text>
+
+        <rect class="box" x="1056" y="398" width="228" height="50" rx="4"/>
+        <text class="t-title" x="1068" y="419">LangSmith</text>
+        <text class="t-tag" x="1272" y="419" text-anchor="end">OPTIONAL</text>
+        <text class="t-sub" x="1068" y="437">traces · dev only</text>
+
+        <rect class="box" x="1056" y="466" width="228" height="50" rx="4"/>
+        <text class="t-title" x="1068" y="487">LLM provider</text>
+        <text class="t-sub" x="1068" y="505">OpenAI now · Anthropic later</text>
+
+        <rect class="box a" x="1056" y="534" width="228" height="50" rx="4"/>
+        <text class="t-title" x="1068" y="555">RAG endpoint</text>
+        <text class="t-tag a" x="1272" y="555" text-anchor="end">EXISTING</text>
+        <text class="t-sub" x="1068" y="573">guidelines · rationale</text>
+
+        <rect class="box a" x="1056" y="602" width="228" height="50" rx="4"/>
+        <text class="t-title" x="1068" y="623">MCP servers</text>
+        <text class="t-tag a" x="1272" y="623" text-anchor="end">EXISTING</text>
+        <text class="t-sub" x="1068" y="641">patterns · tokens · specs</text>
+
+        <text class="t-meta" x="1056" y="684">the vector store lives behind</text>
+        <text class="t-meta" x="1056" y="699">the RAG endpoint — not ours</text>
+
+        <!-- server -> external (nested gutter routing) -->
+        <path class="dots n" d="M970 423 H1054" marker-end="url(#hN)"/>
+        <text class="t-edge" x="1012" y="416" text-anchor="middle">traces</text>
+        <path class="dots n" d="M956 660 H1000 V491 H1054" marker-end="url(#hN)"/>
+        <path class="dots a" d="M790 688 V704 H1012 V559 H1054" marker-end="url(#hA)"/>
+        <path class="dots a" d="M674 688 V720 H1024 V627 H1054" marker-end="url(#hA)"/>
+
+        <!-- ================= DATA & PACKAGES ================= -->
+        <rect class="band" x="40" y="796" width="1260" height="124" rx="6"/>
+        <text class="t-band" x="60" y="818">DATA &amp; PACKAGES</text>
+
+        <rect class="box a" x="60" y="830" width="208" height="54" rx="4"/>
+        <text class="t-title" x="72" y="853">@shadab5114/pds-core</text>
+        <text class="t-sub" x="72" y="872">catalog · components · tokens</text>
+
+        <rect class="box a" x="280" y="830" width="220" height="54" rx="4"/>
+        <text class="t-title" x="292" y="853">templates/ · data/</text>
+        <text class="t-tag a" x="488" y="853" text-anchor="end">REPO</text>
+        <text class="t-sub" x="292" y="872">curated A2UI + mock data</text>
+
+        <rect class="box" x="512" y="830" width="180" height="54" rx="4"/>
+        <text class="t-title" x="524" y="853">Postgres 16</text>
+        <text class="t-tag" x="680" y="853" text-anchor="end">:5432</text>
+        <text class="t-sub" x="524" y="872">checkpoints · threads</text>
+
+        <rect class="box plan" x="712" y="830" width="270" height="54" rx="4"/>
+        <text class="t-title t-plan" x="724" y="853">Redis</text>
+        <text class="t-tag" x="970" y="853" text-anchor="end">NOT IN V1</text>
+        <text class="t-sub" x="724" y="872">sessions · rate limits · cache</text>
+
+        <rect class="box plan" x="998" y="830" width="286" height="54" rx="4"/>
+        <text class="t-title t-plan" x="1010" y="853">Object store</text>
+        <text class="t-tag" x="1272" y="853" text-anchor="end">LATER</text>
+        <text class="t-sub" x="1010" y="872">templates, once they outgrow the repo</text>
+
+        <!-- adapters <-> data -->
+        <path class="dots a" d="M210 828 V690" marker-end="url(#hA)"/>
+        <text class="t-edge a" x="218" y="772">catalog.json</text>
+        <path class="dots a" d="M326 828 V690" marker-end="url(#hA)"/>
+        <text class="t-edge a" x="334" y="772">templates/*.json</text>
+        <path class="dots n" d="M442 828 V690" marker-end="url(#hN)"/>
+        <text class="t-edge" x="450" y="772">data/*.json</text>
+        <path class="dots n still" d="M558 690 V828" marker-start="url(#hN)" marker-end="url(#hN)"/>
+        <text class="t-edge" x="566" y="772">checkpoints by threadId</text>
+
+        <!-- pds-core -> renderer: the same package feeds both runtimes -->
+        <path class="dots a" d="M150 884 V904 H1320 V198 H422 V158" marker-end="url(#hA)"/>
+        <text class="t-edge a" x="1290" y="213" text-anchor="end">components + tokens · npm</text>
+      </svg>
+    </div>
+    <figcaption><b>One package, two runtimes, plus a curated library.</b> Follow the teal. <code>@shadab5114/pds-core</code> gives the Python server its schemas and the React client its components and tokens. Curated templates are A2UI your team authored, checked by the same gate. Your existing MCP servers and RAG endpoint ground the design brief whenever the agent has to create something. Text and template turns skip grounding entirely, which keeps them fast and exact.</figcaption>
+  </figure>
+
+  <ul class="legend" aria-label="Legend">
+    <li><svg width="44" height="10" aria-hidden="true"><line x1="3" y1="5" x2="41" y2="5" class="sw-n" stroke-width="2.3" stroke-linecap="round" stroke-dasharray="0 7"/></svg>call or data flow, dots move in its direction</li>
+    <li><svg width="44" height="10" aria-hidden="true"><line x1="3" y1="5" x2="41" y2="5" class="sw-a" stroke-width="2.3" stroke-linecap="round" stroke-dasharray="0 7"/></svg>carries design-system knowledge</li>
+    <li><svg width="26" height="18" aria-hidden="true"><rect x="1" y="1" width="24" height="16" rx="3" class="sw-box"/></svg>design-system touchpoint</li>
+    <li><svg width="26" height="18" aria-hidden="true"><rect x="1" y="1" width="24" height="16" rx="3" class="sw-plan"/></svg>planned, not in v1</li>
+    <li><span class="sw-tag">EXISTING</span>already built, plugs in</li>
+  </ul>
+
+  <hr class="rule">
+
+  <div class="cols">
+    <section>
+      <h2>One request, end to end</h2>
+      <ol class="req">
+        <li>The <b>AG-UI client</b> POSTs the prompt or a <code>userAction</code> to <code>/agui/run</code>, with the persona in state, and keeps an SSE stream open.</li>
+        <li><b>FastAPI</b> passes a <code>RunAgentInput</code> to LangGraph, and the <b>checkpointer</b> restores the thread from Postgres.</li>
+        <li><b>Decide</b> works out what&rsquo;s needed and whether a curated template covers it. <b>Policy</b> applies <code>personas.json</code> and falls back if this persona isn&rsquo;t allowed that strategy.</li>
+        <li><code>TEXT</code> streams straight out. <code>TEMPLATE</code> loads a curated template and fills it from <b>data providers</b>. <code>ADAPT</code>, <code>GENERATE</code> and <code>REFINE</code> first <b>Ground</b> through your MCP servers and RAG endpoint, producing a cited design brief.</li>
+        <li><b>Build</b> fills, patches or composes. <b>Verify</b> checks the result against the schema and the guidelines, and repairs failures or asks the designer.</li>
+        <li>The <b>AG-UI encoder</b> streams events back. The client sends them to the chat, gallery and trace panel, and the <b>A2UI renderer</b> draws with PDS components.</li>
+      </ol>
+    </section>
+
+    <section class="status">
+      <div class="existing">
+        <h3 class="a">Already built</h3>
+        <ul><li>React client</li><li>A2UI renderer</li><li>@shadab5114/pds-core</li><li>MCP servers</li><li>RAG endpoint</li><li>Postgres (docker compose)</li></ul>
+      </div>
+      <div>
+        <h3>New in Python</h3>
+        <ul><li>FastAPI edge</li><li>AG-UI encoder</li><li>Decide</li><li>Policy + personas.json</li><li>Ground</li><li>Build</li><li>Verify (schema + guidelines)</li><li>Template library</li><li>Data providers</li><li>Adapters ×7</li></ul>
+      </div>
+      <div class="deferred">
+        <h3>Deferred</h3>
+        <ul><li>Redis</li><li>Object store</li><li>LangSmith</li></ul>
+        <p>Templates start as JSON in the repo, behind an interface, so moving to an object store later is a swap. Add Redis when sessions or rate limits start to matter. LangSmith is one environment variable, and only while developing.</p>
+      </div>
+    </section>
+  </div>
+
+</div>

@@ -1,0 +1,80 @@
+{
+  "input": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "TileContainer",
+              "child": "inner"
+            },
+            {
+              "id": "inner",
+              "component": "Text",
+              "children": "Hi"
+            },
+            {
+              "id": "extra",
+              "component": "Button",
+              "children": "Extra"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "output": {
+    "a2ui": [
+      {
+        "version": "v0.9",
+        "createSurface": {
+          "surfaceId": "main",
+          "catalogId": "x"
+        }
+      },
+      {
+        "version": "v0.9",
+        "updateComponents": {
+          "surfaceId": "main",
+          "components": [
+            {
+              "id": "root",
+              "component": "TileContainer",
+              "children": [
+                "inner",
+                "extra"
+              ]
+            },
+            {
+              "id": "inner",
+              "component": "Text",
+              "children": "Hi"
+            },
+            {
+              "id": "extra",
+              "component": "Button",
+              "children": "Extra"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "result": {
+    "repaired": true,
+    "warnings": [
+      "Attached 1 orphan component(s) to root: extra."
+    ],
+    "errors": []
+  }
+}

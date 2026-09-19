@@ -1,0 +1,23 @@
+{
+  "id": "plan-addons",
+  "version": 1,
+  "title": "Plan add-ons",
+  "intent": "Show the optional add-ons available for a mobile plan (or for all plans), as a checklist",
+  "examples": [
+    "what add-ons are there?",
+    "show me add-ons for Unlimited Plus",
+    "extras for the Everyday 20 plan"
+  ],
+  "personas": [
+    "assistant",
+    "explorer"
+  ],
+  "data": {
+    "provider": "addons.list"
+  },
+  "caption": "Here are the add-ons.",
+  "events": {
+    "confirm_addons": "The user confirmed their add-on choices (context: planId, addons with a selected flag each)."
+  },
+  "suggestedNext": []
+}

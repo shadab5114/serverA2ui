@@ -336,7 +336,7 @@ function makeImplementation(name: string) {
  *  system has no generic stack/row container, so we fall back to these for
  *  spacing/structure; pds components still win on any name overlap.
  *  MUST stay in sync with the server's BASIC_LAYOUT_COMPONENTS keys in
- *  src/basicLayoutCatalog.js (which teaches the LLM the same set). */
+ *  server/app/grounding/layout.py (which teaches the LLM the same set). */
 const FALLBACK_LAYOUT = ["Column", "Row", "List", "Divider"];
 
 /** Build the merged catalog (pds components + basic-catalog layout) for the

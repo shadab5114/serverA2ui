@@ -1,0 +1,55 @@
+{
+  "_note": "ILLUSTRATIVE mock data for the GenUI playground. Invented plan names and prices; not a real carrier's offers.",
+  "plans": [
+    {
+      "id": "starter-5",
+      "name": "Starter 5",
+      "priceMonthly": 25,
+      "dataGb": 5,
+      "unlimited": false,
+      "hotspotGb": 0,
+      "badge": "Budget pick",
+      "features": ["5 GB high-speed data", "Unlimited talk & text", "Wi-Fi calling"]
+    },
+    {
+      "id": "everyday-20",
+      "name": "Everyday 20",
+      "priceMonthly": 40,
+      "dataGb": 20,
+      "unlimited": false,
+      "hotspotGb": 5,
+      "badge": "Most popular",
+      "features": ["20 GB high-speed data", "5 GB hotspot", "Calls to 20 countries"]
+    },
+    {
+      "id": "unlimited-go",
+      "name": "Unlimited Go",
+      "priceMonthly": 55,
+      "dataGb": null,
+      "unlimited": true,
+      "hotspotGb": 10,
+      "badge": "Best value",
+      "features": ["Unlimited data (slows after 50 GB)", "10 GB hotspot", "SD streaming"]
+    },
+    {
+      "id": "unlimited-plus",
+      "name": "Unlimited Plus",
+      "priceMonthly": 70,
+      "dataGb": null,
+      "unlimited": true,
+      "hotspotGb": 30,
+      "badge": "Travel ready",
+      "features": ["Unlimited premium data", "30 GB hotspot", "Data in 30 countries", "HD streaming"]
+    },
+    {
+      "id": "unlimited-max",
+      "name": "Unlimited Max",
+      "priceMonthly": 90,
+      "dataGb": null,
+      "unlimited": true,
+      "hotspotGb": 60,
+      "badge": "Premium",
+      "features": ["Unlimited premium data", "60 GB hotspot", "Data in 200+ countries", "4K streaming", "Streaming bundle included"]
+    }
+  ]
+}
