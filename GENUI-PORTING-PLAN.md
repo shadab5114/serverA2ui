@@ -13,6 +13,31 @@ changes listed in *What changes and why*.
 
 ---
 
+## Before you start: what to copy
+
+Copy these from the reference repository into the office project (keeping the same relative paths), together
+with this document:
+
+| Copy | Why |
+|---|---|
+| `server/` — **without** `.venv/`, `__pycache__/`, `.pytest_cache/` and `server/.env` | The whole backend: graph, prompts, gate, templates and providers code, tests and evals. |
+| `templates/` (3 folders) and `data/` (including `data/providers/`) | Working reference content: two flows and a declared provider. Rebuilt in VDS components in S1, replaced by office use cases in S7 and removed in S8. |
+| `client/src/Chat.tsx`, `TracePanel.tsx`, `VariantCard.tsx` | Copied as they are. |
+| `client/src/pdsCatalog.tsx` | The template for `vdsCatalog.tsx`. Not used as is. |
+| `client/src/App.tsx`, `App.css`, `main.tsx`, `types.d.ts`, `client/vite.config.ts` | References for the tab, the styles, the CSS imports and the proxy. Merge into the existing client rather than overwriting it. |
+| The root `package.json` scripts `agui` and `test` | How the backend and tests are run everywhere in this document. |
+
+**Never copy** `server/.env` or the root `.env` (secrets), `.venv/`, `node_modules/`, or the reference
+`guidelines/` folder (the RAG replaces it).
+
+**Before the first phase, have these ready:** the `@vds/core` package (and registry credentials if it's
+private), the Anthropic base URL, key and the model ids that endpoint serves, the Aurora connection details and
+a database the app may create tables in, the MCP server URL (plus any auth header), and the RAG URL, its
+collection name for design guidelines, and one real request and response so the adapter's field names are
+right. Put them in `.env` as described in *Configuration*.
+
+---
+
 ## Status
 
 - [ ] **S1** Bring the code over; switch the design system to @vds/core
