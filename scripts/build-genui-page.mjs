@@ -29,13 +29,13 @@ const PAGES = [
     src: docs("genui-playground.src.html"),
     out: docs("genui-playground-architecture.html"),
     description:
-      "System architecture and two-persona user flows for a design-system-grounded generative UI playground.",
+      "System architecture and two-persona user flows for agentic generative UI grounded in the Verizon design system.",
   },
   {
     src: docs("genui-stack.src.html"),
     out: docs("genui-stack.html"),
     description:
-      "Every runtime entity in the GenUI playground (React client, Python server, external services and data) and how they connect.",
+      "Every runtime entity in the generative UI system (React client, Python server, external services and data) and how they connect.",
   },
 ];
 

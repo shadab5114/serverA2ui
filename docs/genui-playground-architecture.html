@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="System architecture and two-persona user flows for a design-system-grounded generative UI playground.">
-<title>Agentic GenUI Playground</title>
+<meta name="description" content="System architecture and two-persona user flows for agentic generative UI grounded in the Verizon design system.">
+<title>Agentic Generative UI on the Verizon Design System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -21,7 +21,7 @@
 </style>
 </head>
 <body>
-<!-- Source of truth for the GenUI playground architecture page.
+<!-- Source of truth for the GenUI architecture page.
      Edit THIS file. Then run:  npm run docs:genui
      -> regenerates docs/genui-playground-architecture.html (standalone, shareable). -->
 <style>
@@ -207,17 +207,74 @@
 <div class="wrap">
 
   <p class="eyebrow">System design · design-system-grounded generative UI</p>
-  <h1>Agentic GenUI Playground</h1>
-  <p class="lede">A showcase, not an app. It exists to demonstrate one claim: an agent can compose UI freely, and <strong>the design system is what makes that composition safe, on-brand and repeatable</strong> rather than a novelty.</p>
+  <h1>Agentic Generative UI on the Verizon Design System</h1>
+  <p class="lede">An agent composes UI on demand, and <strong>the Verizon design system is what makes that composition safe, on-brand and repeatable</strong>. This is the architecture that runs it: how a request becomes a screen, where the design system enters, and what keeps anything unapproved off the screen.</p>
   <ul class="meta">
-    <li>LangGraph</li><li>AG-UI / SSE</li><li>A2UI v0.9</li><li>Curated templates</li><li>Schema + guideline gates</li><li>MCP + RAG</li><li>Postgres checkpointer</li><li>React + PDS</li>
+    <li>LangGraph</li><li>AG-UI / SSE</li><li>A2UI v0.9</li><li>Curated templates</li><li>Schema + guideline gates</li><li>MCP + RAG</li><li>Postgres checkpointer</li><li>React + VDS</li>
   </ul>
 
   <hr class="rule">
 
   <span class="sec-no">01 — Overall architecture</span>
   <h2>Four layers and one turn</h2>
-  <p class="sec-intro">Each layer answers a different question: what the user sees, how it travels, who decides, and what constrains the decision. State cuts across all four. If a new feature doesn&rsquo;t sit in exactly one layer, it isn&rsquo;t scoped yet.</p>
+  <p class="sec-intro">One turn in five steps. Everything after this is the same turn with more detail.</p>
+
+  <figure>
+    <div class="scroll">
+      <svg class="dgm" viewBox="0 0 1100 250" role="img" aria-label="Five steps in a row: Ask, Decide, Build, Check, Show. The Verizon design system sits underneath Decide, Build and Check, supplying catalog.json, curated templates and guidelines through MCP and RAG.">
+        <defs>
+          <marker id="arN1" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ar-n"/></marker>
+          <marker id="arA1" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ar-a"/></marker>
+        </defs>
+
+        <rect class="box" x="40" y="64" width="176" height="62" rx="4"/>
+        <text class="t-title" x="54" y="90">Ask</text>
+        <text class="t-sub" x="54" y="110">typed, or a tap on screen</text>
+        <text class="t-edge" x="128" y="146" text-anchor="middle">customer or designer</text>
+
+        <line class="flow" x1="220" y1="95" x2="242" y2="95" marker-end="url(#arN1)"/>
+
+        <rect class="box" x="246" y="64" width="176" height="62" rx="4"/>
+        <text class="t-title" x="260" y="90">Decide</text>
+        <text class="t-sub" x="260" y="110">reuse a screen, or create</text>
+
+        <line class="flow" x1="426" y1="95" x2="448" y2="95" marker-end="url(#arN1)"/>
+
+        <rect class="box" x="452" y="64" width="176" height="62" rx="4"/>
+        <text class="t-title" x="466" y="90">Build</text>
+        <text class="t-sub" x="466" y="110">fill a template · compose</text>
+
+        <line class="flow" x1="632" y1="95" x2="654" y2="95" marker-end="url(#arN1)"/>
+
+        <rect class="box" x="658" y="64" width="176" height="62" rx="4"/>
+        <text class="t-title" x="672" y="90">Check</text>
+        <text class="t-sub" x="672" y="110">schema gate · guidelines</text>
+
+        <line class="flow" x1="838" y1="95" x2="860" y2="95" marker-end="url(#arN1)"/>
+
+        <rect class="box" x="864" y="64" width="176" height="62" rx="4"/>
+        <text class="t-title" x="878" y="90">Show</text>
+        <text class="t-sub" x="878" y="110">real Verizon components</text>
+
+        <line class="acc-flow" x1="334" y1="164" x2="334" y2="130" marker-end="url(#arA1)"/>
+        <line class="acc-flow" x1="540" y1="164" x2="540" y2="130" marker-end="url(#arA1)"/>
+        <line class="acc-flow" x1="746" y1="164" x2="746" y2="130" marker-end="url(#arA1)"/>
+
+        <rect class="acc-band" x="246" y="166" width="588" height="64" rx="5"/>
+        <text class="acc-t" x="262" y="188" font-size="10.5" letter-spacing=".11em">VERIZON DESIGN SYSTEM</text>
+        <rect class="acc-chip" x="262" y="196" width="150" height="26" rx="3"/>
+        <text class="acc-t" x="272" y="213" font-size="10">catalog.json</text>
+        <rect class="acc-chip" x="424" y="196" width="176" height="26" rx="3"/>
+        <text class="acc-t" x="434" y="213" font-size="10">curated templates</text>
+        <rect class="acc-chip" x="612" y="196" width="206" height="26" rx="3"/>
+        <text class="acc-t" x="622" y="213" font-size="10">guidelines · MCP · RAG</text>
+        <text class="t-edge" x="850" y="202">what each step may use</text>
+      </svg>
+    </div>
+    <figcaption><b>Ask, decide, build, check, show.</b> The agent first asks whether an approved screen already covers the request; it either fills that template with real data or composes something new from the catalog. Every result is checked against the component schemas and the design guidelines before anything is rendered. The design system is what each step in the middle is allowed to use.</figcaption>
+  </figure>
+
+  <p class="sec-intro">The same turn, layer by layer. Each layer answers a different question: what the user sees, how it travels, who decides, and what constrains the decision. State cuts across all four. If a new feature doesn&rsquo;t sit in exactly one layer, it isn&rsquo;t scoped yet.</p>
 
   <figure>
     <div class="scroll">
@@ -296,7 +353,7 @@
 
         <rect class="acc-band" x="800" y="300" width="260" height="220" rx="5"/>
         <text class="acc-t" x="814" y="320" font-size="10.5" letter-spacing=".11em">4 · GROUNDING</text>
-        <text class="t-sub" x="814" y="336">your design system</text>
+        <text class="t-sub" x="814" y="336">Verizon design system</text>
         <rect class="acc-box" x="814" y="346" width="232" height="36" rx="4"/>
         <text class="t-title" x="824" y="369" font-size="12">catalog.json</text>
         <text class="acc-t" x="1036" y="369" font-size="10" text-anchor="end">PUSH</text>
@@ -332,13 +389,13 @@
 
   <hr class="rule">
 
-  <span class="sec-no">02 — Where your team&rsquo;s work lands</span>
+  <span class="sec-no">02 — Where the design system team&rsquo;s work lands</span>
   <h2>One catalog, three jobs</h2>
-  <p class="sec-intro">This is the impact argument in one picture. The artifact your team already maintains feeds three different parts of the system. A component change reaches all three at once, instead of being re-implemented three times.</p>
+  <p class="sec-intro">This is the impact argument in one picture. The artifact the design system team already maintains feeds three different parts of the system. A component change reaches all three at once, instead of being re-implemented three times.</p>
 
   <figure>
     <div class="scroll">
-      <svg class="dgm" viewBox="0 0 900 290" role="img" aria-label="catalog.json branches three ways: injected into the agent prompt as its component vocabulary, compiled into schemas for the validator gate, and bound to PDS components in the renderer.">
+      <svg class="dgm" viewBox="0 0 900 290" role="img" aria-label="catalog.json branches three ways: injected into the agent prompt as its component vocabulary, compiled into schemas for the validator gate, and bound to VDS components in the renderer.">
         <defs>
           <marker id="arB" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="7" markerHeight="6" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ar-a"/></marker>
         </defs>
@@ -363,10 +420,10 @@
         <text class="t-sub" x="518" y="154">what reaches the wire, templates included</text>
         <rect class="box" x="500" y="200" width="360" height="56" rx="4"/>
         <text class="t-title" x="518" y="225">Renderer map</text>
-        <text class="t-sub" x="518" y="244">A2UI node → PDS component + tokens</text>
+        <text class="t-sub" x="518" y="244">A2UI node → VDS component + tokens</text>
       </svg>
     </div>
-    <figcaption><b>Change a component once; the agent&rsquo;s vocabulary, the safety gate and the rendered pixels all move together.</b> Curated templates are checked by the same gate in CI, so a catalog change that breaks a template breaks the build, not the demo. Guidelines and rationale don&rsquo;t travel this path. They&rsquo;re too large and open-ended to inject, which is why MCP and RAG exist as a separate layer the agent can query.</figcaption>
+    <figcaption><b>Change a component once; the agent&rsquo;s vocabulary, the safety gate and the rendered pixels all move together.</b> Curated templates are checked by the same gate in CI, so a catalog change that breaks a template breaks the build, not the running system. Guidelines and rationale don&rsquo;t travel this path. They&rsquo;re too large and open-ended to inject, which is why MCP and RAG exist as a separate layer the agent can query.</figcaption>
   </figure>
 
   <hr class="rule">
@@ -418,7 +475,7 @@
 
   <span class="sec-no">04 — User flow</span>
   <h2>Two personas, one template library</h2>
-  <p class="sec-intro">The customer and the designer start from the <b>same curated templates</b>. The customer gets them exactly as designed. The designer can explore changes on top of them, grounded in your guidelines and checked by the same gates.</p>
+  <p class="sec-intro">The customer and the designer start from the <b>same curated templates</b>. The customer gets them exactly as designed. The designer can explore changes on top of them, grounded in the Verizon design system&rsquo;s guidelines and checked by the same gates.</p>
 
   <div class="dial">
     <p>Both flows move along one dial: how much the agent decides.</p>
@@ -561,8 +618,8 @@
   </div>
 
   <div class="closer">
-    <h3>What the audience should actually watch</h3>
-    <p>A demo where UI simply appears is indistinguishable from a designer with a good prompt. Point at the <b>trace panel</b> instead: the agent choosing your curated template over inventing one, explaining why, consulting your guidelines, and being corrected by your gates.</p>
+    <h3>What makes this more than UI that appears</h3>
+    <p>UI that simply appears is indistinguishable from a designer with a good prompt. The evidence is in the <b>trace panel</b>: the agent choosing a curated template over inventing one, explaining why, consulting the Verizon design system&rsquo;s guidelines, and being corrected by its gates.</p>
     <p>That&rsquo;s why the decision&rsquo;s reason is sent to the client, why <code>TOOL_CALL_*</code> is a first-class event rather than a debug log, and why every grounding tool returns <code>{ answer, sources[] }</code>. Making the grounding step visible is an architecture decision, not a UI one.</p>
   </div>
 

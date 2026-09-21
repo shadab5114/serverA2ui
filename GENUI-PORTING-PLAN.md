@@ -145,6 +145,51 @@ reads the catalog from the root `node_modules`) and in `client/`.
 
 ---
 
+## The VDS component set is different, and that's fine
+
+**Do not build a PDS→VDS component comparison.** The reference design system's component names have no
+authority here. `@vds/core/catalog.json` is the only source of truth: the generator prompt, the validator gate
+and the client all read it, so whatever it contains is what the system can build with. A mapping table would
+only be a second, stale source of truth.
+
+Component names appear in exactly these places, and nowhere else:
+
+| Where | What to do |
+|---|---|
+| `client/src/vdsCatalog.tsx` — `componentMap` | Mechanical: one entry per name in `catalog.json` → the VDS React component of that name. |
+| `client/src/vdsCatalog.tsx` — `CLOSE_ACTION`, `TWO_WAY` | Only the components that act on close (modal, notification) and the inputs. |
+| `app/generation/prompt.py` — interactivity examples | Rewrite the two or three examples using VDS components that exist. |
+| `app/explore/variants.py` — `COMMON_COMPONENTS` | Pick the VDS names for: body text, badge, inline notification, button, and an accordion with its item. |
+| `templates/*/surface.json` | Re-author from VDS components (see below). |
+| `tests/test_gate.py`, `tests/test_explore.py`, `tests/test_contract.py`, `evals/modify_cases.py` | Swap the components in fixture documents; keep every assertion. |
+
+**Choose by role, not by name.** List what VDS offers and pick the closest fit:
+
+```bash
+node -e "const c=require('./node_modules/@vds/core/catalog.json');
+const props=(s)=>Object.keys(((s.allOf||[]).find(x=>x.properties)||s).properties||{});
+for (const [n,s] of Object.entries(c.components)) {
+  const p=props(s), role=['children','action','label','value','checked'].filter(k=>p.includes(k)).join(',');
+  console.log(n.padEnd(26), (role||'-').padEnd(24), (s.description||'').slice(0,70)); }"
+```
+
+The roles the system needs are: a **container that takes `children`** (for tiles and cards that hold a body),
+**text** at a few sizes, an **action** (a button with an `action` prop), **inputs** (a `value` or `checked`
+prop plus a `label`), a short **status label** (badge or pill), and a **message** component (notification or
+banner). Layout comes from `Column`, `Row`, `List` and `Divider`, which aren't part of VDS.
+
+**Templates are content: rebuild the screen, don't translate it.** Keep the data bindings, list templates,
+event names and the manifest exactly as they are, because the providers, tests and evals depend on them. Choose
+VDS components freely for everything else. If VDS has no equivalent of something (say a tile has no badge
+strip), **drop that detail or express it another way** — a badge component above the title works as well. A
+simpler screen built from components that really exist is the goal; a faithful imitation of the reference is
+not.
+
+**Never invent a component or a prop.** If it isn't in `catalog.json`, the gate rejects it and the turn fails.
+Two checks catch mistakes immediately, so lean on them instead of reasoning about the catalog for long:
+`npm test` (every template gates with every param case, and fixtures are validated) and the startup banner's
+component count.
+
 ## The client: what changes
 
 Your client keeps everything it has. The Generate UI screen only changes where it points (S2). What's new is the
@@ -440,7 +485,8 @@ values. Then re-run the evals (S6), because DECIDE and the judge are sensitive t
   layout components, and an accordion with its item. Every name must exist in the VDS catalog or in `layout.py`.
 - **Neutral examples** in the ADAPT and REFINE prompts (`variants.py`, `modify.py`) use `"component": "Text"`.
   If VDS names its text component differently, rename it there too.
-- **Reference templates:** re-author `plan-tiles`, `plan-addons` and `order-history` in VDS components. Keep
+- **Reference templates:** re-author `plan-tiles`, `plan-addons` and `order-history` in VDS components, as
+  described in *The VDS component set is different, and that's fine*. Keep
   every binding path, list template, `event` name and the manifests as they are, because the providers and
   evals depend on them. Pick VDS components that can hold the content (a tile with a body for plan and order
   tiles, a checkbox list for add-ons). They're working examples for S3–S6; office use cases replace them in S7.

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Every runtime entity in the GenUI playground (React client, Python server, external services and data) and how they connect.">
-<title>GenUI Stack Map</title>
+<meta name="description" content="Every runtime entity in the generative UI system (React client, Python server, external services and data) and how they connect.">
+<title>Generative UI Stack Map</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -150,13 +150,13 @@
 
 <div class="wrap">
 
-  <p class="eyebrow">Runtime map · target architecture · Python backend</p>
-  <h1>GenUI Stack Map</h1>
-  <p class="lede">Every runtime entity in the playground and how they connect. The React client stays as it is. The server is rebuilt in Python behind <strong>the same wire contract</strong>. For every prompt, it decides whether to reuse a curated template or create new UI from the catalog.</p>
+  <p class="eyebrow">Runtime map · system architecture</p>
+  <h1>Generative UI Stack Map</h1>
+  <p class="lede">Every runtime entity and how they connect: a React client, a Python server and the services behind it, joined by <strong>one wire contract</strong>. For every prompt, the server decides whether to reuse a curated template or create new UI from the catalog.</p>
 
   <figure>
     <div class="scroll">
-      <svg class="dgm" viewBox="0 0 1340 940" role="img" aria-label="Stack map. Frontend: AG-UI client, A2UI renderer, chat pane with persona switch, variant gallery, trace panel. The AG-UI client posts to a Python FastAPI server. Inside one LangGraph graph, a pipeline runs Decide, Policy (from personas.json), Ground, Build and Verify; text and template turns skip grounding. The graph uses seven adapters: catalog, template store, data providers, checkpointer, MCP client, RAG client and LLM client. They connect to the pds-core package, repo templates and mock data, Postgres, existing MCP servers, an existing RAG endpoint and an LLM provider. Verified UI and streamed text go back through an AG-UI encoder over SSE. pds-core also supplies components and tokens to the renderer. Redis and an object store for templates are planned, not in v1.">
+      <svg class="dgm" viewBox="0 0 1340 940" role="img" aria-label="Stack map. Frontend: AG-UI client, A2UI renderer, chat pane with persona switch, variant gallery, trace panel. The AG-UI client posts to a Python FastAPI server. Inside one LangGraph graph, a pipeline runs Decide, Policy (from personas.json), Ground, Build and Verify; text and template turns skip grounding. The graph uses seven adapters: catalog, template store, data providers, checkpointer, MCP client, RAG client and LLM client. They connect to the @vds/core package, repo templates and mock data, Postgres, existing MCP servers, an existing RAG endpoint and an LLM provider. Verified UI and streamed text go back through an AG-UI encoder over SSE. @vds/core also supplies components and tokens to the renderer. Redis and an object store for templates are out of scope.">
         <defs>
           <marker id="hN" viewBox="0 0 10 8" refX="8" refY="4" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="8" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="hn"/></marker>
           <marker id="hA" viewBox="0 0 10 8" refX="8" refY="4" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="8" orient="auto-start-reverse"><polygon points="0,0 10,4 0,8" class="ha"/></marker>
@@ -173,7 +173,7 @@
 
         <rect class="box a" x="308" y="96" width="228" height="60" rx="4"/>
         <text class="t-title" x="322" y="121">A2UI renderer</text>
-        <text class="t-sub" x="322" y="141">@a2ui/react · PDS components</text>
+        <text class="t-sub" x="322" y="141">@a2ui/react · VDS components</text>
 
         <rect class="box" x="556" y="96" width="228" height="60" rx="4"/>
         <text class="t-title" x="570" y="121">Chat pane</text>
@@ -352,7 +352,7 @@
         <text class="t-band" x="60" y="818">DATA &amp; PACKAGES</text>
 
         <rect class="box a" x="60" y="830" width="208" height="54" rx="4"/>
-        <text class="t-title" x="72" y="853">@shadab5114/pds-core</text>
+        <text class="t-title" x="72" y="853">@vds/core</text>
         <text class="t-sub" x="72" y="872">catalog · components · tokens</text>
 
         <rect class="box a" x="280" y="830" width="220" height="54" rx="4"/>
@@ -367,7 +367,7 @@
 
         <rect class="box plan" x="712" y="830" width="270" height="54" rx="4"/>
         <text class="t-title t-plan" x="724" y="853">Redis</text>
-        <text class="t-tag" x="970" y="853" text-anchor="end">NOT IN V1</text>
+        <text class="t-tag" x="970" y="853" text-anchor="end">OUT OF SCOPE</text>
         <text class="t-sub" x="724" y="872">sessions · rate limits · cache</text>
 
         <rect class="box plan" x="998" y="830" width="286" height="54" rx="4"/>
@@ -385,20 +385,20 @@
         <path class="dots n still" d="M558 690 V828" marker-start="url(#hN)" marker-end="url(#hN)"/>
         <text class="t-edge" x="566" y="772">checkpoints by threadId</text>
 
-        <!-- pds-core -> renderer: the same package feeds both runtimes -->
+        <!-- @vds/core -> renderer: the same package feeds both runtimes -->
         <path class="dots a" d="M150 884 V904 H1320 V198 H422 V158" marker-end="url(#hA)"/>
         <text class="t-edge a" x="1290" y="213" text-anchor="end">components + tokens · npm</text>
       </svg>
     </div>
-    <figcaption><b>One package, two runtimes, plus a curated library.</b> Follow the teal. <code>@shadab5114/pds-core</code> gives the Python server its schemas and the React client its components and tokens. Curated templates are A2UI your team authored, checked by the same gate. Your existing MCP servers and RAG endpoint ground the design brief whenever the agent has to create something. Text and template turns skip grounding entirely, which keeps them fast and exact.</figcaption>
+    <figcaption><b>One package, two runtimes, plus a curated library.</b> Follow the teal. <code>@vds/core</code> gives the Python server its schemas and the React client its components and tokens. Curated templates are A2UI the design team authored, checked by the same gate. The Verizon design system&rsquo;s MCP servers and RAG endpoint ground the design brief whenever the agent has to create something. Text and template turns skip grounding entirely, which keeps them fast and exact.</figcaption>
   </figure>
 
   <ul class="legend" aria-label="Legend">
     <li><svg width="44" height="10" aria-hidden="true"><line x1="3" y1="5" x2="41" y2="5" class="sw-n" stroke-width="2.3" stroke-linecap="round" stroke-dasharray="0 7"/></svg>call or data flow, dots move in its direction</li>
     <li><svg width="44" height="10" aria-hidden="true"><line x1="3" y1="5" x2="41" y2="5" class="sw-a" stroke-width="2.3" stroke-linecap="round" stroke-dasharray="0 7"/></svg>carries design-system knowledge</li>
     <li><svg width="26" height="18" aria-hidden="true"><rect x="1" y="1" width="24" height="16" rx="3" class="sw-box"/></svg>design-system touchpoint</li>
-    <li><svg width="26" height="18" aria-hidden="true"><rect x="1" y="1" width="24" height="16" rx="3" class="sw-plan"/></svg>planned, not in v1</li>
-    <li><span class="sw-tag">EXISTING</span>already built, plugs in</li>
+    <li><svg width="26" height="18" aria-hidden="true"><rect x="1" y="1" width="24" height="16" rx="3" class="sw-plan"/></svg>out of scope</li>
+    <li><span class="sw-tag">EXISTING</span>existing platform service</li>
   </ul>
 
   <hr class="rule">
@@ -412,21 +412,21 @@
         <li><b>Decide</b> works out what&rsquo;s needed and whether a curated template covers it. <b>Policy</b> applies <code>personas.json</code> and falls back if this persona isn&rsquo;t allowed that strategy.</li>
         <li><code>TEXT</code> streams straight out. <code>TEMPLATE</code> loads a curated template and fills it from <b>data providers</b>. <code>ADAPT</code>, <code>GENERATE</code> and <code>REFINE</code> first <b>Ground</b> through your MCP servers and RAG endpoint, producing a cited design brief.</li>
         <li><b>Build</b> fills, patches or composes. <b>Verify</b> checks the result against the schema and the guidelines, and repairs failures or asks the designer.</li>
-        <li>The <b>AG-UI encoder</b> streams events back. The client sends them to the chat, gallery and trace panel, and the <b>A2UI renderer</b> draws with PDS components.</li>
+        <li>The <b>AG-UI encoder</b> streams events back. The client sends them to the chat, gallery and trace panel, and the <b>A2UI renderer</b> draws with VDS components.</li>
       </ol>
     </section>
 
     <section class="status">
       <div class="existing">
-        <h3 class="a">Already built</h3>
-        <ul><li>React client</li><li>A2UI renderer</li><li>@shadab5114/pds-core</li><li>MCP servers</li><li>RAG endpoint</li><li>Postgres (docker compose)</li></ul>
+        <h3 class="a">Platform it builds on</h3>
+        <ul><li>React client</li><li>A2UI renderer</li><li>@vds/core</li><li>MCP servers</li><li>RAG endpoint</li><li>Postgres</li></ul>
       </div>
       <div>
-        <h3>New in Python</h3>
+        <h3>The generative UI server</h3>
         <ul><li>FastAPI edge</li><li>AG-UI encoder</li><li>Decide</li><li>Policy + personas.json</li><li>Ground</li><li>Build</li><li>Verify (schema + guidelines)</li><li>Template library</li><li>Data providers</li><li>Adapters ×7</li></ul>
       </div>
       <div class="deferred">
-        <h3>Deferred</h3>
+        <h3>Deliberately out of scope</h3>
         <ul><li>Redis</li><li>Object store</li><li>LangSmith</li></ul>
         <p>Templates start as JSON in the repo, behind an interface, so moving to an object store later is a swap. Add Redis when sessions or rate limits start to matter. LangSmith is one environment variable, and only while developing.</p>
       </div>
