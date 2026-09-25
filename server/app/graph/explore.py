@@ -311,7 +311,10 @@ def make_refine_node(store: TemplateStore, grounder: Grounder, generate: Generat
                 log.fail(f"can't reopen {target} — {err}")
             return await say(f"I couldn't reopen {name} to change it ({err}).")
 
-        found, suggested, gnotes = await _ground(grounder, request, request)
+        # The change is what's grounded (guidelines + RAG): DECIDE's intent first, since the
+        # message itself often names the target rather than the change ("on variant 2, …").
+        query = f"{plan.get('intent') or ''}. {request}".strip(". ")
+        found, suggested, gnotes = await _ground(grounder, query, request)
         soft = _soft(found)
         by_id = {s.id: s for s in found}
 

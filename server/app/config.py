@@ -20,6 +20,11 @@ def _int(name: str, default: int) -> int:
     return int(raw) if raw else default
 
 
+def _float(name: str, default: float) -> float:
+    raw = os.getenv(name, "").strip()
+    return float(raw) if raw else default
+
+
 @dataclass(frozen=True)
 class Settings:
     port: int
@@ -37,6 +42,8 @@ class Settings:
     personas_path: Path
     guidelines_dir: Path
     rag_url: str | None
+    rag_collection: str
+    rag_timeout: float
     mcp_url: str | None
     mcp_server_script: Path | None
     guideline_judge: bool
@@ -64,7 +71,11 @@ def load_settings() -> Settings:
         providers_dir=Path(os.getenv("PROVIDERS_DIR", "").strip() or data_dir / "providers"),
         personas_path=SERVER_DIR / "config" / "personas.json",
         guidelines_dir=Path(os.getenv("GUIDELINES_DIR", "").strip() or REPO_ROOT / "guidelines"),
+        # Design-system RAG (D2): POST {query, collection_name} -> {answer, citations}.
         rag_url=os.getenv("RAG_URL", "").strip() or None,
+        rag_collection=os.getenv("RAG_COLLECTION", "").strip() or "design_system",
+        # 30 s, not 10: the service writes an answer, so it is slower than plain retrieval.
+        rag_timeout=_float("RAG_TIMEOUT", 30.0),
         mcp_url=os.getenv("MCP_URL", "").strip() or None,
         mcp_server_script=Path(p) if (p := os.getenv("MCP_SERVER_SCRIPT", "").strip()) else None,
         # gpt-5 / o-series only: "low" keeps turns fast and leaves the output cap for the answer.

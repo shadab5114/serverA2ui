@@ -55,14 +55,15 @@ def parse_frames(body: str) -> list[dict]:
     return events
 
 
-def decide_says(strategy: str = "TEXT", template_id: str | None = None, params: dict | None = None, data=None, target=None):
+def decide_says(strategy: str = "TEXT", template_id: str | None = None, params: dict | None = None, data=None,
+                target=None, intent="test"):
     """A fake DECIDE that always proposes the same thing (records what it was shown)."""
     seen: list = []
 
     async def decide(messages, persona, manifests, context=None):
         seen.append((list(messages), persona, manifests, context))
         return Decision(
-            intent="test", strategy=strategy, templateId=template_id,
+            intent=intent, strategy=strategy, templateId=template_id,
             params=[ProviderParam(name=k, value=str(v)) for k, v in (params or {}).items()],
             coverage="full" if template_id else "none", gaps=[], reason="because the test says so",
             dataProviders=data or [], target=target,
@@ -105,15 +106,16 @@ FAKE_BRIEF = DesignBrief(
 )
 
 
-def fake_grounder(brief: DesignBrief = FAKE_BRIEF) -> Grounder:
-    """Real grounding over the local guideline markdown; the brief model and MCP are stubbed."""
+def fake_grounder(brief: DesignBrief = FAKE_BRIEF, sources: list | None = None) -> Grounder:
+    """Real grounding over the local guideline markdown; the brief model and MCP are stubbed.
+    `sources` adds guideline sources next to it (e.g. a canned RAG service)."""
     seen: list = []
 
     async def make_brief(system, inputs):
         seen.append(inputs)
         return brief
 
-    g = Grounder(guidelines=Guidelines([LocalGuidelines()]), mcp=None, brief=make_brief)
+    g = Grounder(guidelines=Guidelines([LocalGuidelines(), *(sources or [])]), mcp=None, brief=make_brief)
     g.seen = seen
     return g
 

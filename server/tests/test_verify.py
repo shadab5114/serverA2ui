@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import json
 
+import httpx
 import pytest
 
 from app.config import settings
@@ -85,8 +87,70 @@ def test_rag_is_bypassed_until_configured():
     assert merged.sources and "guidelines.rag: bypassed" in merged.note
 
 
-def test_rag_response_adapter():
-    res = RagSource._parse({"answer": "Use one primary.", "sources": [
-        {"id": "g-1", "title": "Buttons", "excerpt": "One primary.", "uri": "https://ds/buttons"}]})
-    assert res.answer == "Use one primary."
-    assert (res.sources[0].id, res.sources[0].text, res.sources[0].origin) == ("g-1", "One primary.", "https://ds/buttons")
+def fake_rag(body, status=200, seen=None) -> RagSource:
+    """A RagSource wired to a canned /query response (D2's contract), recording the request."""
+    def handle(request: httpx.Request) -> httpx.Response:
+        if seen is not None:
+            seen.append({"url": str(request.url), "json": json.loads(request.content)})
+        return httpx.Response(status, json=body)
+
+    return RagSource(url="http://127.0.0.1:5000/query", collection="design_system",
+                     transport=httpx.MockTransport(handle))
+
+
+def test_rag_sends_query_and_collection_name():
+    seen = []
+    res = asyncio.run(fake_rag({"answer": "Use one primary button.", "citations": []}, seen=seen).search("make it louder"))
+    assert seen == [{"url": "http://127.0.0.1:5000/query",
+                     "json": {"query": "make it louder", "collection_name": "design_system"}}]
+    # The service's answer is citable in its own right, so the brief and the patch prompts see it.
+    [answer] = res.sources
+    assert (answer.id, answer.title, answer.text, answer.origin) == (
+        "RAG-ANSWER", "Guidance for this request", "Use one primary button.", "rag/design_system")
+    assert res.answer == "Use one primary button." and res.note == ""
+
+
+def test_rag_citations_become_citable_sources():
+    res = RagSource._parse({
+        "answer": "One primary per screen.",
+        "citations": [
+            {"title": "DS-101 · Primary buttons", "text": "One primary.", "source": "rules/buttons.md", "page": 2},
+            {"title": "Tiles", "snippet": "Keep tiles alike."},  # no ref: falls back to the collection
+            "docs/spacing-scale.md",  # citations as bare document refs
+        ],
+    }, origin="rag/design_system")
+    assert [(s.id, s.title, s.origin) for s in res.sources] == [
+        ("RAG-ANSWER", "Guidance for this request", "rag/design_system"),
+        ("DS-101", "DS-101 · Primary buttons p.2", "rules/buttons.md"),  # a cited rule keeps its id
+        ("RAG-2", "Tiles", "rag/design_system"),
+        ("RAG-3", "spacing scale", "docs/spacing-scale.md"),
+    ]
+    assert res.sources[1].kind == "hard" and res.sources[2].text == "Keep tiles alike."
+
+
+def test_rag_reads_answers_as_a_list_too():
+    # GENUI-PORTING-PLAN.md S5 describes the same service answering with "answers".
+    res = RagSource._parse({"answers": ["One primary per screen.", "Label every field."]})
+    assert res.sources[0].id == "RAG-ANSWER" and res.answer == "One primary per screen.\n\nLabel every field."
+
+
+def test_rag_tolerates_an_empty_or_odd_response():
+    assert RagSource._parse({}).sources == [] and RagSource._parse({}).note == "no answer and no citations"
+    # Only citations, no answer, is still grounding; a single citation may come unwrapped.
+    res = RagSource._parse({"citations": {"title": "Tiles", "text": "Alike."}})
+    assert [(s.id, s.text) for s in res.sources] == [("RAG-1", "Alike.")]
+    assert asyncio.run(fake_rag([1, 2]).search("x")).note.startswith("unexpected response: list")
+
+
+def test_a_failing_rag_call_never_blocks_grounding():
+    merged = asyncio.run(Guidelines([LOCAL, fake_rag({"detail": "no such collection"}, status=404)])
+                         .search("sign-up form fields"))
+    assert [s.origin for s in merged.sources] == ["guidelines/guidelines.md"] * len(merged.sources)
+    assert "guidelines.rag: failed" in merged.note and "404" in merged.note
+
+
+def test_local_rules_win_over_the_rag_copy_of_the_same_rule():
+    rag = fake_rag({"answer": "", "citations": [{"title": "DS-101", "text": "stale copy"}]})
+    merged = asyncio.run(Guidelines([LOCAL, rag]).search("DS-101 primary button"))
+    [ds101] = [s for s in merged.sources if s.id == "DS-101"]
+    assert ds101.origin == "guidelines/hard-rules.md" and "stale copy" not in ds101.text

@@ -22,6 +22,7 @@ from app.templates.store import FileTemplateStore
 from app.verify.judge import SoftViolation
 
 from .test_contract import decide_says, fake_grounder, parse_frames, tool_calls
+from .test_verify import fake_rag
 
 STORE = FileTemplateStore(settings.templates_dir)
 
@@ -247,10 +248,10 @@ def fake_explore(*replies):
     return generate
 
 
-def use_explorer_graph(decide, explore, judge=None):
+def use_explorer_graph(decide, explore, judge=None, grounder=None):
     app.state.graph = build_graph(
         InMemorySaver(), model=GenericFakeChatModel(messages=iter([])), decide=decide,
-        grounder=fake_grounder(), judge=judge, explore_generate=explore,
+        grounder=grounder or fake_grounder(), judge=judge, explore_generate=explore,
     )
     app.state.checkpointer_kind = "memory"
 
@@ -387,6 +388,53 @@ async def test_findings_the_base_screen_already_has_are_not_flagged_on_variants(
     assert None in changes_seen and any(c and "heading.children" in c for c in changes_seen)
     summaries = [c["result"]["summary"] for c in tool_calls(events) if c["name"] == "guidelines.judge"]
     assert any("already on the base screen" in s for s in summaries)
+
+
+async def test_a_change_request_queries_the_rag_service_and_its_answer_reaches_the_prompt(client):
+    seen = []
+    rag = fake_rag({
+        "answer": "Keep headings to one line; don't reorder the tiles.",
+        "citations": [{"title": "DS-203 · Consistent option tiles", "source": "rules/tiles.md"},
+                      {"title": "Headings", "text": "Headings are sentence case.", "source": "docs/headings.md"}],
+    }, seen=seen)
+    explore = fake_explore(modified(RETITLE, "Shortened the title"))
+    use_explorer_graph(
+        Decisions(decide_says("TEMPLATE", "plan-tiles"),
+                  decide_says("REFINE", target="baseline-1", intent="shorten the plans heading")),
+        explore, grounder=fake_grounder(sources=[rag]),
+    )
+    await client.post("/agui/run", json=explorer_payload("show me the plans", thread="thread_rag"))
+    assert seen == []  # showing a curated screen grounds nothing
+
+    r = await client.post("/agui/run", json=explorer_payload("make the heading shorter", thread="thread_rag", run="r2"))
+    events = parse_frames(r.text)
+    # The change is the query: DECIDE's intent leads, then the user's words.
+    assert [c["json"] for c in seen] == [
+        {"query": "shorten the plans heading. make the heading shorter", "collection_name": "design_system"}]
+    # Its answer and citations are traced next to the local rules, with the endpoint that was asked...
+    [call] = [c for c in tool_calls(events) if c["name"] == "guidelines.search"]
+    assert call["args"]["in"] == ["guidelines.local", "guidelines.rag http://127.0.0.1:5000/query (design_system)"]
+    assert {"RAG-ANSWER", "DS-203", "RAG-2"} <= {s["id"] for s in call["result"]["sources"]}
+    # ...and reach the prompt the change is made from.
+    guidelines = json.loads(explore.seen[-1][1])["guidelines"]
+    assert {"id": "RAG-ANSWER", "title": "Guidance for this request",
+            "text": "Keep headings to one line; don't reorder the tiles."} in guidelines
+    assert surfaces_of(events)[0]["meta"]["card"]["label"] == "Variant 1"
+
+
+async def test_a_change_request_still_works_when_the_rag_service_is_down(client):
+    rag = fake_rag({"detail": "collection not found"}, status=404)
+    explore = fake_explore(modified(RETITLE, "Shortened the title"))
+    use_explorer_graph(
+        Decisions(decide_says("TEMPLATE", "plan-tiles"),
+                  decide_says("REFINE", target="baseline-1", intent="option tiles")),
+        explore, grounder=fake_grounder(sources=[rag]))
+    await client.post("/agui/run", json=explorer_payload("show me the plans", thread="thread_rag_down"))
+    r = await client.post("/agui/run", json=explorer_payload("make the heading shorter", thread="thread_rag_down", run="r2"))
+    events = parse_frames(r.text)
+    [call] = [c for c in tool_calls(events) if c["name"] == "guidelines.search"]
+    assert "guidelines.rag: failed" in call["result"]["note"] and call["result"]["sources"]  # local rules still there
+    assert surfaces_of(events)[0]["meta"]["card"]["label"] == "Variant 1"
 
 
 async def test_a_change_for_one_list_item_is_declined_not_applied_to_every_item(client):

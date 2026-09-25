@@ -641,22 +641,30 @@ chat your name, restart the backend, ask for your name on the same chat, and it 
 - Give `Source` an explicit `kind` field (`"hard"`, `"soft"`, `"pattern"`) instead of deriving it from id
   prefixes, and update the two filters that select soft rules for the judge (`Grounding.soft_rules` in
   `ground/ground.py` and `_soft()` in `graph/explore.py`) to read the field.
-- `RagSource.search(query)`:
+- `RagSource.search(query)` — **already built** in this repo (D2 answered 2026-09-25, playground backend): the
+  request is `{"query": query, "collection_name": settings.rag_collection}` (`query`, not `prompt`) and the
+  response `{"answer": str, "citations": [...]}`, with `_answer_text` also accepting `answers` as a string or a
+  list. `RAG_URL`, `RAG_COLLECTION` and `RAG_TIMEOUT` exist. Port `app/grounding/sources.py` as it stands and
+  change only what the office API actually differs on:
   ```python
-  resp = await client.post(settings.rag_url, json={"prompt": query, "collection_name": settings.rag_collection},
+  resp = await client.post(settings.rag_url, json={"query": query, "collection_name": settings.rag_collection},
                            timeout=settings.rag_timeout)
   resp.raise_for_status()
   return self._parse(resp.json())
   ```
-  `_parse(body)` turns `{"answers": …, "citations": [...]}` into a `GroundingResult`:
-  - `answers` (a string, or a list of strings joined with blank lines) becomes the result's `answer` **and** a
-    source `Source(id="RAG-ANSWER", title="Guidance for this request", text=<answers>, origin="rag", kind="soft")`,
-    so the design brief and the judge see the guidance even when citations carry no text.
-  - Each citation (a string, or an object) becomes `Source(id=<citation id, else "rag-<n>">, title=<title or
+  `_parse(body)` turns `{"answer": …, "citations": [...]}` into a `GroundingResult`:
+  - `answer` (or `answers`: a string, or a list of strings joined with blank lines) becomes the result's `answer`
+    **and** a source `Source(id="RAG-ANSWER", title="Guidance for this request", text=<answer>, origin="rag",
+    kind="soft")`, so the design brief and the judge see the guidance even when citations carry no text. **This
+    `kind="soft"` is the one deliberate difference from the playground backend**, where the answer is `other`
+    (un-judged) because the local markdown still supplies soft rules; here RAG is the only source, so make it
+    soft as part of the explicit-`kind` change above.
+  - Each citation (a string, or an object) becomes `Source(id=<citation id, else "RAG-<n>">, title=<title or
     source name>, text=<text/content/snippet, else "">, origin=<url or document, else "rag">, kind=<its type if
-    it is hard/soft/pattern, else "soft">)`.
-  - Use the exact request and response field names of the office RAG API. They live only in `search` and
-    `_parse`.
+    it is hard/soft/pattern, else "soft">)`. A citation that names a rule (`DS-101`) keeps that id, which merges
+    it with any local copy of the rule.
+  - Use the exact request and response field names of the office RAG API. They live only in `search`,
+    `_answer_text` and `_parse`.
 - A failed RAG call never breaks a turn: `Guidelines.search` records `guidelines.rag: failed (…)` as a note, and
   the brief is built without guidelines.
 - **Hard rules** (`app/verify/lints.py`): each hard rule is one entry `{id, title, text, check}`, where `check`

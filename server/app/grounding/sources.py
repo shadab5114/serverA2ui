@@ -7,10 +7,14 @@ guideline gate and the trace panel quote.
   LocalGuidelines  sections of the markdown files in GUIDELINES_DIR, each headed
                    "## <ID> · <Title>" (hard-rules.md, guidelines.md). Keyword
                    retrieval: small and deterministic, fine for a handful of rules.
-  RagSource        the design-system RAG service (open decision D2). While
+  RagSource        the design-system RAG service: POST RAG_URL {query,
+                   collection_name} -> {answer, citations} (decision D2). While
                    RAG_URL is unset the call is BYPASSED: it returns no sources
-                   and says so. Adapt `_parse` to the real response shape.
+                   and says so.
   Guidelines       queries all sources and merges their results.
+
+Both are asked on every grounded turn — GENERATE, and equally ADAPT/REFINE, where
+the query is the change the user asked for (graph/explore.py `_ground`).
 """
 
 from __future__ import annotations
@@ -117,40 +121,121 @@ class LocalGuidelines:
         return GroundingResult("\n\n".join(f"{s.cite()} {s.text}" for s in hits), hits)
 
 
+# GENUI-PORTING-PLAN.md S5 names the answer source; keep the id stable across both backends.
+RAG_ANSWER_ID = "RAG-ANSWER"
+RAG_ANSWER_TITLE = "Guidance for this request"
+_CITE_TEXT = ("text", "snippet", "content", "excerpt", "chunk", "passage", "quote")
+_CITE_REF = ("source", "uri", "url", "document", "file", "path", "filename", "link")
+_CITE_TITLE = ("title", "heading", "section", "name", "label")
+_CITE_ID = ("id", "doc_id", "document_id", "chunk_id", "ref")
+_RULE_ID = re.compile(r"[A-Z]{2,}-\d+")
+
+
+def _first(cite: dict[str, Any], keys: tuple[str, ...]) -> str:
+    """The first of `keys` the citation actually has, as a stripped string."""
+    for key in keys:
+        value = cite.get(key)
+        if isinstance(value, (str, int, float)) and not isinstance(value, bool) and str(value).strip():
+            return str(value).strip()
+    return ""
+
+
+def _answer_text(body: dict[str, Any]) -> str:
+    """The service's answer: "answer", or "answers" as a string or a list of strings."""
+    raw = body.get("answer") or body.get("answers")
+    if isinstance(raw, list):
+        return "\n\n".join(str(a).strip() for a in raw if str(a).strip())
+    return str(raw or "").strip()
+
+
+def _label(ref: str) -> str:
+    """A readable title from a document reference: "docs/buttons-and-links.md" -> "buttons and links"."""
+    stem = re.split(r"[\\/]", ref.rstrip("/\\"))[-1]
+    return re.sub(r"[-_]+", " ", re.sub(r"\.\w{1,5}$", "", stem)).strip()
+
+
 class RagSource:
-    """The design-system RAG service. Bypassed until RAG_URL is set (open decision D2)."""
+    """The design-system RAG service (decision D2, answered 2026-09-25).
+
+        POST <RAG_URL>   {"query": ..., "collection_name": ...}
+        200              {"answer": "...", "citations": [...]}
+
+    The `answer` is guidance written for this query, so it becomes a citable source of
+    its own (id "RAG-ANSWER") alongside the citations it was built from: it then reaches the
+    design brief, the ADAPT/REFINE prompts, the variant cards and the trace panel
+    through the same `sources` list as the local markdown, with no second prompt path.
+
+    Citation shapes differ between RAG servers, so `_citation` reads the usual key
+    names, tolerates plain strings, and falls back to "RAG-<n>" ids; a citation that
+    names a rule ("DS-101") keeps that id, which merges it with the local copy of the
+    rule (local text wins, since `Guidelines` queries it first). Bypassed while RAG_URL
+    is unset. The endpoint has no top-k param, so `k` clips the citations here.
+    """
 
     name = "guidelines.rag"
 
-    def __init__(self, url: str | None = None, timeout: float = 10.0) -> None:
+    def __init__(
+        self,
+        url: str | None = None,
+        collection: str | None = None,
+        timeout: float | None = None,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
         self.url = url if url is not None else settings.rag_url
-        self.timeout = timeout
+        self.collection = collection if collection is not None else settings.rag_collection
+        self.timeout = settings.rag_timeout if timeout is None else timeout
+        self.transport = transport  # tests inject an httpx.MockTransport
 
     @property
     def enabled(self) -> bool:
         return bool(self.url)
 
+    @property
+    def origin(self) -> str:
+        return f"rag/{self.collection}" if self.collection else "rag"
+
     async def search(self, query: str, k: int = 5) -> GroundingResult:
         if not self.enabled:
             return GroundingResult("", [], note="bypassed: RAG_URL is not set")
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            # ASSUMED request/response shape until D2 is answered; adapt here and in _parse.
-            resp = await client.post(self.url, json={"query": query, "top_k": k})
+        async with httpx.AsyncClient(timeout=self.timeout, transport=self.transport) as client:
+            resp = await client.post(self.url, json={"query": query, "collection_name": self.collection})
             resp.raise_for_status()
-            return self._parse(resp.json())
+            body = resp.json()
+        if not isinstance(body, dict):
+            return GroundingResult("", [], note=f"unexpected response: {type(body).__name__}, expected an object")
+        return self._parse(body, origin=self.origin, k=k)
+
+    @classmethod
+    def _parse(cls, body: dict[str, Any], *, origin: str = "rag", k: int = 5) -> GroundingResult:
+        answer = _answer_text(body)
+        raw = body.get("citations")
+        if isinstance(raw, (str, dict)):  # a single citation, unwrapped
+            raw = [raw]
+        sources = [cls._citation(i, c, origin) for i, c in enumerate(raw or [], 1) if c][:k]
+        if answer:
+            sources.insert(0, Source(RAG_ANSWER_ID, RAG_ANSWER_TITLE, answer, origin))
+        return GroundingResult(answer, sources, "" if sources else "no answer and no citations")
+
+    @classmethod
+    def _citation(cls, i: int, cite: Any, origin: str) -> Source:
+        if not isinstance(cite, dict):  # citations as bare document refs
+            ref = str(cite).strip()
+            return Source(cls._cite_id(ref, i), _label(ref) or f"citation {i}", "", ref or origin)
+        ref = _first(cite, _CITE_REF)
+        title = _first(cite, _CITE_TITLE) or _label(ref) or f"citation {i}"
+        page = _first(cite, ("page", "page_number"))
+        return Source(
+            id=cls._cite_id(f"{_first(cite, _CITE_ID)} {title} {ref}", i),
+            title=f"{title} p.{page}" if page else title,
+            text=_first(cite, _CITE_TEXT),
+            origin=ref or origin,
+        )
 
     @staticmethod
-    def _parse(body: dict[str, Any]) -> GroundingResult:
-        sources = [
-            Source(
-                id=str(s.get("id") or s.get("uri") or f"rag-{i}"),
-                title=str(s.get("title") or ""),
-                text=str(s.get("text") or s.get("excerpt") or ""),
-                origin=str(s.get("uri") or "rag"),
-            )
-            for i, s in enumerate(body.get("sources") or [])
-        ]
-        return GroundingResult(str(body.get("answer") or ""), sources)
+    def _cite_id(hint: str, i: int) -> str:
+        """A citation that names a rule ("DS-101 · Primary buttons", "rules/DS-101.md") keeps the rule's id."""
+        found = _RULE_ID.search(hint)
+        return found.group(0) if found else f"RAG-{i}"
 
 
 class Guidelines:
@@ -160,6 +245,15 @@ class Guidelines:
 
     def __init__(self, sources: list[GuidelineSource] | None = None) -> None:
         self.sources: list[GuidelineSource] = sources if sources is not None else [LocalGuidelines(), RagSource()]
+
+    @property
+    def targets(self) -> list[str]:
+        """Where a search goes, for the trace panel: each source, and the RAG endpoint it will call."""
+        out = []
+        for src in self.sources:
+            where = f" {src.url} ({src.collection})" if isinstance(src, RagSource) and src.enabled else ""
+            out.append(f"{src.name}{where}")
+        return out
 
     async def search(self, query: str, k: int = 5) -> GroundingResult:
         answers, merged, notes, seen = [], [], [], set()

@@ -139,7 +139,7 @@ class Grounder:
         """(guidelines, components, notes): the traced lookups, without a brief.
         ADAPT/REFINE use this directly: each variant carries its own rationale and citations."""
         notes: list[str] = []
-        async with tracer.tool(self.guidelines.name + ".search", {"query": query}) as call:
+        async with tracer.tool(self.guidelines.name + ".search", {"query": query, "in": self.guidelines.targets}) as call:
             found = await self.guidelines.search(query, k=k)
             call.set(_summary(found, "guideline"), sources=[asdict(s) for s in found.sources], note=found.note)
         if found.note:

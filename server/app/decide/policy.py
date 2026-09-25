@@ -92,6 +92,8 @@ class Plan:
         return {
             "strategy": self.strategy,
             "proposed": self.proposed,
+            # GROUND queries the guidelines and the RAG service with this, not the raw message.
+            "intent": self.intent,
             "templateId": self.template_id,
             "params": self.params,
             "coverage": self.coverage,

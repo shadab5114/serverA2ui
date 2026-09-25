@@ -66,7 +66,8 @@ async def lifespan(app: FastAPI):
         kinds = {k: sum(1 for r in rules if r.kind == k) for k in ("hard", "soft", "pattern")}
         print(f"  guidelines:       {kinds['hard']} hard rules, {kinds['soft']} soft, {kinds['pattern']} patterns "
               f"from {settings.guidelines_dir}; judge {'on' if settings.guideline_judge else 'off'}", flush=True)
-        print(f"  rag:              {rag.url if rag and rag.enabled else 'bypassed (RAG_URL not set)'}", flush=True)
+        rag_status = f"{rag.url} collection {rag.collection}" if rag and rag.enabled else "bypassed (RAG_URL not set)"
+        print(f"  rag:              {rag_status}", flush=True)
         print(f"  mcp:              {mcp_status}", flush=True)
         try:
             yield
