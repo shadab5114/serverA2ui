@@ -47,6 +47,7 @@ class Settings:
     mcp_url: str | None
     mcp_server_script: Path | None
     guideline_judge: bool
+    ground_questions: bool
     reasoning_effort: str | None
 
 
@@ -81,6 +82,8 @@ def load_settings() -> Settings:
         # gpt-5 / o-series only: "low" keeps turns fast and leaves the output cap for the answer.
         reasoning_effort=(None if (e := os.getenv("OPENAI_REASONING_EFFORT", "low").strip().lower()) in ("", "default") else e),
         guideline_judge=os.getenv("GUIDELINE_JUDGE", "on").strip().lower() not in ("off", "0", "false", "no"),
+        # Off -> GROUND retrieves with the request itself (vaguer queries, one less call per grounded turn).
+        ground_questions=os.getenv("GROUND_QUESTIONS", "on").strip().lower() not in ("off", "0", "false", "no"),
     )
 
 

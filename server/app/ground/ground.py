@@ -1,6 +1,9 @@
 """GROUND: turn a GENERATE request into a design brief before building (P7).
 
-  guidelines.search   local markdown now, RAG later (sources.Guidelines)
+  retrieval_questions what to ask the design system, reasoned from the turn before
+                     anything is retrieved (questions.py): the user's words are not
+                     a query, so this writes the standalone questions they imply
+  guidelines.search   one search per question: local markdown + the RAG (sources.Guidelines)
   mcp.resolve_intent  components the design system's MCP server suggests
   <provider>          REAL data the UI needs (DECIDE's dataProviders): the
                       generator must seed and bind it, never invent values
@@ -14,6 +17,7 @@ generator. The brief, data and cited rules are appended to the user's request as
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import Awaitable, Callable
 from dataclasses import asdict, dataclass, field
@@ -30,6 +34,7 @@ from ..graph.trace import Tracer
 from ..grounding.catalog import generation_catalog
 from ..grounding.mcp import CatalogMcp
 from ..grounding.sources import Guidelines, GroundingResult, Source
+from .questions import MOST, QUESTIONS_PROMPT, VOCABULARY, Ask, QuestionsFn, make_questions_fn
 
 
 class BriefRule(BaseModel):
@@ -122,10 +127,12 @@ class Grounder:
         guidelines: Guidelines | None = None,
         mcp: CatalogMcp | None = None,
         brief: BriefFn | None = None,
+        questions: QuestionsFn | None = None,
     ) -> None:
         self.guidelines = guidelines or Guidelines()
         self.mcp = mcp
         self._brief = brief
+        self._questions = questions
 
     @property
     def brief_fn(self) -> BriefFn:
@@ -133,15 +140,46 @@ class Grounder:
             self._brief = make_brief_fn()
         return self._brief
 
+    @property
+    def questions_fn(self) -> QuestionsFn:
+        if self._questions is None:
+            self._questions = make_questions_fn()
+        return self._questions
+
+    async def ask(self, ask: Ask, tracer: Tracer) -> tuple[list[str], list[str]]:
+        """(queries, notes): what to ask the knowledge base, reasoned from the turn (see ground/questions.py).
+
+        The user's words are not a retrieval query, so a small call turns them into standalone
+        questions first. Any failure degrades to `ask.fallback()` — retrieving worse, never not at all.
+        """
+        if not settings.ground_questions:
+            return ask.fallback(), ["retrieval questions off (GROUND_QUESTIONS): asking with the request itself"]
+        inputs = ask.as_inputs()
+        # The trace shows what it reasoned FROM, minus the catalog vocabulary (35 names, no news to anyone).
+        async with tracer.tool("retrieval_questions", {k: v for k, v in inputs.items() if k != VOCABULARY}) as call:
+            try:
+                out = await self.questions_fn(QUESTIONS_PROMPT, inputs)
+            except Exception as err:  # noqa: BLE001 — better a vague query than no grounding
+                call.set(f"failed, asking with the request itself: {err}")
+                return ask.fallback(), [f"retrieval questions failed ({err}): asked with the request itself"]
+            queries = [q.strip() for q in out.questions if q and q.strip()][:MOST]
+            call.set(f"{out.need} → " + " | ".join(queries) if queries else "no questions came back",
+                     need=out.need, questions=queries)
+        if not queries:
+            return ask.fallback(), ["retrieval questions came back empty: asked with the request itself"]
+        return queries, []
+
     async def retrieve(
-        self, query: str, tracer: Tracer, *, mcp_intent: str | None = None, k: int = 6
+        self, ask: Ask, tracer: Tracer, *, mcp_intent: str | None = None, k: int = 6
     ) -> tuple[GroundingResult, GroundingResult, list[str]]:
         """(guidelines, components, notes): the traced lookups, without a brief.
         ADAPT/REFINE use this directly: each variant carries its own rationale and citations."""
-        notes: list[str] = []
-        async with tracer.tool(self.guidelines.name + ".search", {"query": query, "in": self.guidelines.targets}) as call:
-            found = await self.guidelines.search(query, k=k)
-            call.set(_summary(found, "guideline"), sources=[asdict(s) for s in found.sources], note=found.note)
+        queries, notes = await self.ask(ask, tracer)
+        # One search per question (the RAG answers each one), then merge: first question's hits first.
+        results = await asyncio.gather(*(self._search(q, tracer, k) for q in queries))
+        # Several questions can return a lot between them; keep the brief's prompt bounded, most
+        # important question's hits first.
+        found = _merge_results(results, most=2 * k)
         if found.note:
             notes.append(found.note)
 
@@ -150,7 +188,7 @@ class Grounder:
             # The catalog server matches component vocabulary, so ask it with the best pattern's
             # composition when one was retrieved (the user's words rarely name components).
             pattern = next((s for s in found.sources if s.kind == "pattern"), None)
-            intent = mcp_intent or (f"{pattern.title}. {pattern.text}" if pattern else query)
+            intent = mcp_intent or (f"{pattern.title}. {pattern.text}" if pattern else queries[0])
             async with tracer.tool("mcp.resolve_intent_to_schema", {"intent": intent[:500], "limit": 6}) as call:
                 try:
                     components = await self.mcp.resolve_intent(intent, limit=6)
@@ -161,9 +199,15 @@ class Grounder:
             notes.append(components.note)
         return found, components, notes
 
-    async def ground(self, request: str, plan: dict[str, Any], tracer: Tracer) -> Grounding:
-        query = f"{plan.get('intent') or ''}. {request}".strip(". ")
-        found, components, notes = await self.retrieve(query, tracer)
+    async def _search(self, query: str, tracer: Tracer, k: int) -> GroundingResult:
+        async with tracer.tool(self.guidelines.name + ".search", {"query": query, "in": self.guidelines.targets}) as call:
+            found = await self.guidelines.search(query, k=k)
+            call.set(_summary(found, "guideline"), sources=[asdict(s) for s in found.sources], note=found.note)
+        return found
+
+    async def ground(self, ask: Ask, plan: dict[str, Any], tracer: Tracer) -> Grounding:
+        request = ask.request
+        found, components, notes = await self.retrieve(ask, tracer)
 
         outputs: dict[str, dict[str, Any]] = {}
         for name in plan.get("dataProviders") or []:
@@ -197,6 +241,20 @@ class Grounder:
             guidance=guidance_text(brief, found.sources, data),
             notes=notes,
         )
+
+
+def _merge_results(results: list[GroundingResult], most: int = 12) -> GroundingResult:
+    """Several searches as one result: sources deduped by id, in the order the questions asked."""
+    if len(results) == 1:
+        return results[0]
+    merged, seen = [], set()
+    for res in results:
+        for s in res.sources:
+            if s.id not in seen:
+                seen.add(s.id)
+                merged.append(s)
+    return GroundingResult("\n\n".join(r.answer for r in results if r.answer), merged[:most],
+                           "; ".join(dict.fromkeys(r.note for r in results if r.note)))
 
 
 def _summary(res: GroundingResult, noun: str) -> str:

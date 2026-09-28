@@ -40,13 +40,14 @@ from ..explore.variants import (
     user_prompt,
 )
 from ..ground.ground import Grounder
+from ..ground.questions import Ask, screen_components
 from ..grounding.sources import GroundingResult, Source
 from ..log import current_log
 from ..templates.render import render_template
 from ..templates.store import Template, TemplateError, TemplateStore
 from ..verify.judge import JudgeFn
 from .progress import StatusTicker, send_status
-from .state import GraphState, last_user_text
+from .state import GraphState, last_user_text, recent_turns
 from .trace import TRACE
 
 TEMPLATE_APOLOGY = "I couldn't load that screen right now. Please try again in a moment."
@@ -117,12 +118,12 @@ async def _safe(task) -> VariantResult | Exception:
         return err
 
 
-async def _ground(grounder: Grounder, query: str, mcp_intent: str) -> tuple[list[Source], list[str], list[str]]:
+async def _ground(grounder: Grounder, ask: Ask, mcp_intent: str) -> tuple[list[Source], list[str], list[str]]:
     """(guideline sources, suggested component names, notes). Failure degrades to no grounding."""
     log = current_log.get()
     async with TRACE.step("ground"), StatusTicker(STAGE_GROUND):
         try:
-            found, components, notes = await grounder.retrieve(query, TRACE, mcp_intent=mcp_intent)
+            found, components, notes = await grounder.retrieve(ask, TRACE, mcp_intent=mcp_intent)
         except Exception as err:  # noqa: BLE001 — grounding helps; it must not block the variants
             if log:
                 log.warn(f"grounding failed, exploring without guidelines — {err}")
@@ -146,6 +147,7 @@ async def _settle(task: asyncio.Task | None) -> None:
     """Let the background base-screen judge finish (it's usually done) so no task outlives the node."""
     if task is not None:
         await task
+        
 
 
 def _missing_line(sid: str, record: dict[str, Any], missing: list[dict[str, str]]) -> str:
@@ -188,11 +190,17 @@ def make_adapt_node(store: TemplateStore, grounder: Grounder, generate: Generate
             })
         screen = Screen(rendered["a2ui"], get_provider(m.provider), m.ref)
 
-        # 2. Ground the change.
+        # 2. Ground the change: what must we know about these components to vary them well?
         gaps = plan.get("gaps") or []
-        found, suggested, notes = await _ground(
-            grounder, f"{plan.get('intent') or ''}. {request}. {' '.join(gaps)}".strip(". "), "; ".join(gaps) or request
+        ask = Ask(
+            request=request,
+            intent=plan.get("intent") or "",
+            doing=f'proposing {count} variants of the curated "{m.title}" screen',
+            history=recent_turns(state),
+            screen=screen_components(rendered["a2ui"]),
+            gaps=gaps,
         )
+        found, suggested, notes = await _ground(grounder, ask, "; ".join(gaps) or request)
         by_id = {s.id: s for s in found}
 
         # 3. Variants: propose N patches, verify each alone, emit each as it passes.
@@ -311,10 +319,17 @@ def make_refine_node(store: TemplateStore, grounder: Grounder, generate: Generat
                 log.fail(f"can't reopen {target} — {err}")
             return await say(f"I couldn't reopen {name} to change it ({err}).")
 
-        # The change is what's grounded (guidelines + RAG): DECIDE's intent first, since the
-        # message itself often names the target rather than the change ("on variant 2, …").
-        query = f"{plan.get('intent') or ''}. {request}".strip(". ")
-        found, suggested, gnotes = await _ground(grounder, query, request)
+        # The change is what's grounded (guidelines + RAG). The message alone is no query
+        # ("make the badge yellow"), so the questions are reasoned from the screen it points
+        # at, its components' props and the turns that led here (ground/questions.py).
+        ask = Ask(
+            request=request,
+            intent=plan.get("intent") or "",
+            doing=f"changing {name}, a screen already on the user's screen",
+            history=recent_turns(state),
+            screen=screen_components(doc),
+        )
+        found, suggested, gnotes = await _ground(grounder, ask, request)
         soft = _soft(found)
         by_id = {s.id: s for s in found}
 

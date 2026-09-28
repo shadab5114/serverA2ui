@@ -641,6 +641,13 @@ chat your name, restart the backend, ask for your name on the same chat, and it 
 - Give `Source` an explicit `kind` field (`"hard"`, `"soft"`, `"pattern"`) instead of deriving it from id
   prefixes, and update the two filters that select soft rules for the judge (`Grounding.soft_rules` in
   `ground/ground.py` and `_soft()` in `graph/explore.py`) to read the field.
+- **What is sent as `query` is not the user's message.** `app/ground/questions.py` (playground backend, built
+  2026-09-25) reasons out what the design system must answer for the turn — from the message, DECIDE's intent, the
+  conversation so far, the components on the screen being changed with their catalog props, and the catalog's
+  component names — and returns up to 3 standalone questions of ≤20 words. Each is one `RagSource.search`, and
+  the hits merge deduped in question order. Port it with this file: a RAG asked "change the badge to yellow"
+  answers about the wrong thing, and the answer looks plausible. `GROUND_QUESTIONS=off` falls back to
+  `<intent>. <message>`.
 - `RagSource.search(query)` — **already built** in this repo (D2 answered 2026-09-25, playground backend): the
   request is `{"query": query, "collection_name": settings.rag_collection}` (`query`, not `prompt`) and the
   response `{"answer": str, "citations": [...]}`, with `_answer_text` also accepting `answers` as a string or a

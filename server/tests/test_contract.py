@@ -20,6 +20,7 @@ from app.config import settings
 from app.decide.decide import Decision, ProviderParam
 from app.generation.generate import generate_validated_a2ui
 from app.ground.ground import BriefRule, DesignBrief, Grounder
+from app.ground.questions import RetrievalQuestions
 from app.grounding.sources import Guidelines, LocalGuidelines
 from app.graph.playground import build_graph
 from app.main import app
@@ -106,17 +107,26 @@ FAKE_BRIEF = DesignBrief(
 )
 
 
-def fake_grounder(brief: DesignBrief = FAKE_BRIEF, sources: list | None = None) -> Grounder:
-    """Real grounding over the local guideline markdown; the brief model and MCP are stubbed.
-    `sources` adds guideline sources next to it (e.g. a canned RAG service)."""
+def fake_grounder(brief: DesignBrief = FAKE_BRIEF, sources: list | None = None, questions=None,
+                  brief_fn=None) -> Grounder:
+    """Real grounding over the local guideline markdown; the brief and questions models and MCP are stubbed.
+    `sources` adds guideline sources next to it (e.g. a canned RAG service); `questions` replaces the
+    retrieval-question call (default: one question, echoing the request it was given)."""
     seen: list = []
+    asked: list = []
 
     async def make_brief(system, inputs):
         seen.append(inputs)
         return brief
 
-    g = Grounder(guidelines=Guidelines([LocalGuidelines(), *(sources or [])]), mcp=None, brief=make_brief)
+    async def make_questions(system, inputs):
+        asked.append(inputs)
+        return RetrievalQuestions(need="the test needs nothing", questions=[inputs["userMessage"]])
+
+    g = Grounder(guidelines=Guidelines([LocalGuidelines(), *(sources or [])]), mcp=None,
+                 brief=brief_fn or make_brief, questions=questions or make_questions)
     g.seen = seen
+    g.asked = asked
     return g
 
 
@@ -500,9 +510,13 @@ async def test_trace_shows_decision_grounding_brief_and_checks(client):
         ("STEP_STARTED", "build"), ("STEP_FINISHED", "build"),
     ]
     calls = tool_calls(events)
-    assert [c["name"] for c in calls] == ["decide", "guidelines.search", "design_brief", "generate_a2ui", "guidelines.lint"]
-    decide, search, brief, _, lint = calls
+    assert [c["name"] for c in calls] == ["decide", "retrieval_questions", "guidelines.search", "design_brief",
+                                          "generate_a2ui", "guidelines.lint"]
+    decide, asked, search, brief, _, lint = calls
     assert decide["result"]["summary"] == "GENERATE: because the test says so"
+    # What the design system was asked, and from what: the request is not sent as the query (see ground/questions.py).
+    assert asked["args"]["userMessage"] == "a sign-up form with email" and asked["result"]["questions"]
+    assert search["args"]["query"] == asked["result"]["questions"][0]
     assert any(s["id"] == "PAT-302" for s in search["result"]["sources"])  # "sign-up form" finds the form pattern
     assert brief["result"]["brief"]["pattern"] == "PAT-302"
     assert lint["result"]["summary"] == "all hard rules pass"
@@ -573,7 +587,7 @@ async def test_grounding_failure_still_builds_the_ui(client):
 
     gen, prompts = fake_generator(VALID_DOC)
     use_graph(decide=decide_says("GENERATE"), generate_ui=gen,
-              grounder=Grounder(guidelines=Guidelines([LocalGuidelines()]), mcp=None, brief=broken_brief))
+              grounder=fake_grounder(brief_fn=broken_brief))
     events = parse_frames((await client.post("/agui/run", json=payload("a sign-up form"))).text)
     assert prompts[0] == "a sign-up form"  # no brief: the plain request
     assert any(e["type"] == "CUSTOM" and e["name"] == "a2ui" for e in events)

@@ -17,6 +17,7 @@ from .data.providers import REGISTRY
 from .generation.generate import generate_validated_a2ui, system_prompt
 from .graph.playground import build_graph
 from .ground.ground import Grounder
+from .ground.questions import MOST
 from .grounding.mcp import CatalogMcp
 from .grounding.sources import Guidelines, LocalGuidelines, RagSource
 from .grounding.catalog import generation_catalog, load_catalog
@@ -68,6 +69,9 @@ async def lifespan(app: FastAPI):
               f"from {settings.guidelines_dir}; judge {'on' if settings.guideline_judge else 'off'}", flush=True)
         rag_status = f"{rag.url} collection {rag.collection}" if rag and rag.enabled else "bypassed (RAG_URL not set)"
         print(f"  rag:              {rag_status}", flush=True)
+        asks = (f"on: {settings.router_model} writes up to {MOST} questions per grounded turn"
+                if settings.ground_questions else "off (GROUND_QUESTIONS): retrieving with the request itself")
+        print(f"  retrieval qs:     {asks}", flush=True)
         print(f"  mcp:              {mcp_status}", flush=True)
         try:
             yield

@@ -44,6 +44,7 @@ from ..explore.lineage import baseline_record, generated_record, label as surfac
 from ..explore.variants import GenerateFn as ExploreGenerateFn
 from ..generation.generate import STAGE_GENERATE, generate_validated_a2ui
 from ..ground.ground import Grounder, Grounding
+from ..ground.questions import Ask
 from ..grounding.sources import Source
 from ..log import current_log
 from ..generation.llm import generate_a2ui
@@ -51,7 +52,7 @@ from ..templates.store import FileTemplateStore, TemplateError, TemplateStore
 from ..verify.judge import JudgeFn, make_judge
 from .explore import TEMPLATE_APOLOGY, card, make_adapt_node, make_refine_node, render_screen
 from .progress import StatusTicker, send_status
-from .state import GraphState, last_user_text
+from .state import GraphState, last_user_text, recent_turns
 from .trace import TRACE
 
 SYSTEM_PROMPT = (
@@ -186,9 +187,17 @@ def make_ground_node(grounder: Grounder):
     async def ground(state: GraphState) -> dict:
         """Cited design brief + real data for the generator. Failure degrades to ungrounded generation."""
         log = current_log.get()
+        plan = state["plan"]
+        ask = Ask(
+            request=last_user_text(state),
+            intent=plan.get("intent") or "",
+            doing="building a new screen for this request, from the design system's components",
+            history=recent_turns(state),
+            gaps=plan.get("gaps") or [],
+        )
         async with TRACE.step("ground"), StatusTicker(STAGE_GROUND):
             try:
-                g = await grounder.ground(last_user_text(state), state["plan"], TRACE)
+                g = await grounder.ground(ask, plan, TRACE)
             except Exception as err:  # noqa: BLE001 — grounding helps; it must not block the UI
                 if log:
                     log.warn(f"grounding failed, generating without a brief — {err}")

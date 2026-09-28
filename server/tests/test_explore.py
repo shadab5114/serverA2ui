@@ -16,6 +16,7 @@ from app.explore.lineage import baseline_record, label, next_id, rebuild, screen
 from app.explore.patching import PatchError, apply_patch, describe_patch, item_labels, list_items, to_view
 from app.explore.variants import Screen, check, data_contract_errors, parse_proposals, schema_subset
 from app.graph.playground import build_graph
+from app.ground.questions import RetrievalQuestions
 from app.main import app
 from app.templates.render import component_scopes, render_template
 from app.templates.store import FileTemplateStore
@@ -314,7 +315,8 @@ async def test_adapt_emits_baseline_then_verified_variants_then_refine_changes_o
     caption = text_of(events)
     assert "3 variants" in caption and "Variant 3 needs data no provider has yet: `coverage`" in caption
     names = [c["name"] for c in tool_calls(events)]
-    assert names[:3] == ["decide", "plans.list", "guidelines.search"] and "propose_variants" in names
+    assert names[:4] == ["decide", "plans.list", "retrieval_questions", "guidelines.search"]
+    assert "propose_variants" in names
     assert names.count("variant.check") == 4 and names.count("variant.repair") == 1
     # the patch prompt carries the screen, its data fields and scopes, not the whole catalog
     system, user = explore.seen[0]
@@ -390,35 +392,69 @@ async def test_findings_the_base_screen_already_has_are_not_flagged_on_variants(
     assert any("already on the base screen" in s for s in summaries)
 
 
-async def test_a_change_request_queries_the_rag_service_and_its_answer_reaches_the_prompt(client):
+YELLOW_CAP = [{"op": "replace", "path": "/components/plan-tile/cap/backgroundColor", "value": "yellow"}]
+
+QUESTIONS = ["Which values does ComposableTileContainer.cap.backgroundColor accept in this design system?",
+             "When may a yellow badge be used on an option tile, and what contrast rules apply?"]
+
+
+def fake_questions(questions=QUESTIONS, need="what the design system allows for tile caps"):
+    """A fake retrieval-question call: records the context it reasoned from, returns fixed questions."""
+    asked = []
+
+    async def ask(system, inputs):
+        asked.append(inputs)
+        return RetrievalQuestions(need=need, questions=list(questions))
+
+    ask.asked = asked
+    return ask
+
+
+async def test_a_vague_change_becomes_design_system_questions_before_the_rag_is_asked(client):
+    """The user's scenario: "show me the data plans", then "change the colour of the badge to yellow".
+
+    The second message is no retrieval query on its own, so the RAG must be asked what the design
+    system allows for the thing the user pointed at, not sent the message (see ground/questions.py).
+    """
     seen = []
     rag = fake_rag({
-        "answer": "Keep headings to one line; don't reorder the tiles.",
+        "answer": "Tile caps take the badge colour tokens; yellow is reserved for warnings.",
         "citations": [{"title": "DS-203 · Consistent option tiles", "source": "rules/tiles.md"},
-                      {"title": "Headings", "text": "Headings are sentence case.", "source": "docs/headings.md"}],
+                      {"title": "Colour tokens", "text": "yellow: warning only.", "source": "docs/tokens.md"}],
     }, seen=seen)
-    explore = fake_explore(modified(RETITLE, "Shortened the title"))
+    asking = fake_questions()
+    explore = fake_explore(modified(YELLOW_CAP, "Made every tile cap yellow", "all"))
     use_explorer_graph(
         Decisions(decide_says("TEMPLATE", "plan-tiles"),
-                  decide_says("REFINE", target="baseline-1", intent="shorten the plans heading")),
-        explore, grounder=fake_grounder(sources=[rag]),
-    )
-    await client.post("/agui/run", json=explorer_payload("show me the plans", thread="thread_rag"))
-    assert seen == []  # showing a curated screen grounds nothing
+                  decide_says("REFINE", target="baseline-1", intent="recolour the tile badge")),
+        explore, grounder=fake_grounder(sources=[rag], questions=asking))
 
-    r = await client.post("/agui/run", json=explorer_payload("make the heading shorter", thread="thread_rag", run="r2"))
+    await client.post("/agui/run", json=explorer_payload("show me the data plans", thread="thread_q"))
+    assert seen == [] and asking.asked == []  # showing a curated screen grounds nothing
+
+    r = await client.post("/agui/run",
+                          json=explorer_payload("change the color of the badge to yellow", thread="thread_q", run="r2"))
     events = parse_frames(r.text)
-    # The change is the query: DECIDE's intent leads, then the user's words.
-    assert [c["json"] for c in seen] == [
-        {"query": "shorten the plans heading. make the heading shorter", "collection_name": "design_system"}]
-    # Its answer and citations are traced next to the local rules, with the endpoint that was asked...
-    [call] = [c for c in tool_calls(events) if c["name"] == "guidelines.search"]
-    assert call["args"]["in"] == ["guidelines.local", "guidelines.rag http://127.0.0.1:5000/query (design_system)"]
-    assert {"RAG-ANSWER", "DS-203", "RAG-2"} <= {s["id"] for s in call["result"]["sources"]}
-    # ...and reach the prompt the change is made from.
+
+    # 1. The questions were reasoned from the vague message PLUS the screen and the turns that led here.
+    [ctx] = asking.asked
+    assert ctx["userMessage"] == "change the color of the badge to yellow"
+    assert ctx["whatTheUserWants"] == "recolour the tile badge" and "Baseline" in ctx["task"]
+    assert "cap" in ctx["componentsOnTheScreen"]["ComposableTileContainer"]  # "the badge" is a tile cap here
+    assert ctx["conversationSoFar"][0] == "user: show me the data plans"
+
+    # 2. The RAG was asked the questions, one call each — never the user's words.
+    assert [c["json"] for c in seen] == [{"query": q, "collection_name": "design_system"} for q in QUESTIONS]
+
+    # 3. Both answers ground the change: one search per question, merged into one prompt and one trace.
+    searches = [c for c in tool_calls(events) if c["name"] == "guidelines.search"]
+    assert [c["args"]["query"] for c in searches] == QUESTIONS
+    [asked_call] = [c for c in tool_calls(events) if c["name"] == "retrieval_questions"]
+    assert asked_call["result"]["questions"] == QUESTIONS
     guidelines = json.loads(explore.seen[-1][1])["guidelines"]
     assert {"id": "RAG-ANSWER", "title": "Guidance for this request",
-            "text": "Keep headings to one line; don't reorder the tiles."} in guidelines
+            "text": "Tile caps take the badge colour tokens; yellow is reserved for warnings."} in guidelines
+    assert {"DS-203", "RAG-2"} <= {g["id"] for g in guidelines}
     assert surfaces_of(events)[0]["meta"]["card"]["label"] == "Variant 1"
 
 
@@ -426,14 +462,35 @@ async def test_a_change_request_still_works_when_the_rag_service_is_down(client)
     rag = fake_rag({"detail": "collection not found"}, status=404)
     explore = fake_explore(modified(RETITLE, "Shortened the title"))
     use_explorer_graph(
-        Decisions(decide_says("TEMPLATE", "plan-tiles"),
-                  decide_says("REFINE", target="baseline-1", intent="option tiles")),
-        explore, grounder=fake_grounder(sources=[rag]))
+        Decisions(decide_says("TEMPLATE", "plan-tiles"), decide_says("REFINE", target="baseline-1")),
+        explore, grounder=fake_grounder(sources=[rag], questions=fake_questions(["Which option tile guidelines apply?"])))
     await client.post("/agui/run", json=explorer_payload("show me the plans", thread="thread_rag_down"))
     r = await client.post("/agui/run", json=explorer_payload("make the heading shorter", thread="thread_rag_down", run="r2"))
     events = parse_frames(r.text)
     [call] = [c for c in tool_calls(events) if c["name"] == "guidelines.search"]
     assert "guidelines.rag: failed" in call["result"]["note"] and call["result"]["sources"]  # local rules still there
+    assert surfaces_of(events)[0]["meta"]["card"]["label"] == "Variant 1"
+
+
+async def test_a_failing_question_call_falls_back_to_the_request(client):
+    seen = []
+
+    async def broken(system, inputs):
+        raise RuntimeError("questions model down")
+
+    rag = fake_rag({"answer": "Headings are sentence case.", "citations": []}, seen=seen)
+    explore = fake_explore(modified(RETITLE, "Shortened the title"))
+    use_explorer_graph(
+        Decisions(decide_says("TEMPLATE", "plan-tiles"),
+                  decide_says("REFINE", target="baseline-1", intent="shorten the heading")),
+        explore, grounder=fake_grounder(sources=[rag], questions=broken))
+    await client.post("/agui/run", json=explorer_payload("show me the plans", thread="thread_q_down"))
+    r = await client.post("/agui/run", json=explorer_payload("make the heading shorter", thread="thread_q_down", run="r2"))
+    events = parse_frames(r.text)
+    # Degraded to the old behaviour: intent + the user's words, and the turn still lands.
+    assert [c["json"]["query"] for c in seen] == ["shorten the heading. make the heading shorter"]
+    [call] = [c for c in tool_calls(events) if c["name"] == "retrieval_questions"]
+    assert "asking with the request itself" in call["result"]["summary"]
     assert surfaces_of(events)[0]["meta"]["card"]["label"] == "Variant 1"
 
 
